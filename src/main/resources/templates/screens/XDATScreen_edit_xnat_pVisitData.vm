@@ -1,0 +1,609 @@
+$page.setTitle("XDAT")
+$page.setLinkColor($ui.alink)
+$page.setVlinkColor($ui.vlink)
+#if ($data.message)
+<DIV class="error">$data.message</DIV><br>
+#end
+<p>
+
+#if($project)
+
+#else
+  #if($om.getProject())
+    #set($project = $om.getProject())
+  #else
+  	#set($project=$om.getProject())
+  #end
+#end
+
+#if($subject_id)
+
+#else
+  #if($!item.getProperty("subject_id"))
+    #set($subject_id=$!item.getProperty("subject_id"))
+  #else
+    #set($subject_id = "$!part_id" )
+  #end
+#end
+
+#parse("/screens/VisitFunctions.vm")
+
+#if ($item && $item.getProperty("id"))
+<script>
+    YAHOO.util.Event.onDOMReady( function() {
+        var callback={
+            success:function(oResponse){
+                var divForExperiments=document.getElementById("divForExperiments");
+                divForExperiments.innerHTML=oResponse.responseText;
+                divForExperiments.style.display='block';
+                closeModalPanel("load_history");
+            },
+            failure:function(oResponse){
+                closeModalPanel("load_history");
+                xModalMessage('Error', oResponse);
+            }
+        };
+        openModalPanel("load_history","Retrieving Visit Data...");
+        YAHOO.util.Connect.asyncRequest('GET',serverRoot +'/app/template/VisitHelper.vm/search_value/$item.getProperty("id")/search_element/xnat:pVisitData/search_field/xnat:pVisitData.ID/project/$project',callback,null);
+    });
+</script>
+#end
+
+<form name="form1" method="post" action="$link.setAction("ModifyPvisit")">
+#if($vr)
+	<font color="red">Invalid parameters:<BR>$vr.toHTML()</font>
+<HR>
+#end
+
+#if($om.getId())
+    <input type="hidden" id="$!item.getXSIType()/id" name="$!item.getXSIType()/id" value="$om.getId()">
+#end
+
+<table width="450">
+  <tr>
+    <td align="left"><label for="$!item.getXSIType()/project">Project</label></td>
+    <td>
+      #if($om.getId())
+        <div id="project_placeholder">$!om.getProjectDisplayID()</div>
+      #end
+        <select #if($om.getId()) style="display:none" #end id="$!item.getXSIType()/project" name="$!item.getXSIType()/project" style="width: 100%;" disabled=true></select>
+      
+    </td>
+  </tr>
+
+  <tr>
+    <td align="left"><label for="$!item.getXSIType()/subject_id">Subject</label></td>
+    <td>
+      #if($om.getId())
+        <div id="subject_placeholder">$!om.getSubjectData().getLabel() </div>
+      #end
+        <select #if($om.getId()) style="display:none" #end  id="$!item.getXSIType()/subject_id" name="$!item.getXSIType()/subject_id" style="width: 100%;" disabled=true>
+          <option>(Select a project)</option>
+        </select>
+
+    </td>
+  </tr>
+
+	<tr>
+	  <TH align=center colspan=2>Visit Details</TH>
+	</tr>
+    <tr id="visit_entry">
+      <TD align=left><label for="$!item.getXSIType()/visit_name">Visit</label></TD>
+      <TD align=left>
+        <input type="text" id="$!item.getXSIType()/visit_name" name="$!item.getXSIType()/visit_name" style="width: 100%;" disabled=true>
+      </td>
+    </tr>
+    <tr id="visit_type_entry">
+      <TD align=left><label for="$!item.getXSIType()/visit_type">Visit Type</label></TD>
+      <TD align=left>
+        <select id="$!item.getXSIType()/visit_type" name="$!item.getXSIType()/visit_type" style="width: 100%;" disabled=true>
+          <option>(Select a visit type)</option>
+        </select>
+      </td>
+    </tr>
+	<TR>
+      <TD align=left><label for="$!item.getXSIType()/date">Date</label></TD>
+      <TD align=left>
+          <input type="text" id="$!item.getXSIType()/date" name="$!item.getXSIType()/date" #if ($!om.getDate()) value="$turbineUtils.formatDate($om.getDate(), "MM/dd/yyyy")" #end>
+          <script type="text/javascript">insertCalendar(document.getElementById("$!item.getXSIType()/date"), "Visit Date");</script>
+      </TD>
+	</TR>
+    <TR>
+		<TD align=left><label for="xnat:pVisitData/genericData/experimentData/ID">Visit ID</label></TD>
+		<TD align=left>
+			#if($!om.getId())
+                $om.getId()
+			#else
+				Auto Generated
+			#end
+		</TD>
+	</TR>
+	<TR>
+		<TD align=left><label for="xnat:pVisitData/genericData/experimentData/LABEL">Label</label></TD>
+		<TD align=left>
+            #if($!om.getLabel())
+                $om.getLabel()
+			#else
+				Auto Generated
+			#end
+		</TD>
+	</TR>
+	
+	#xdatEditProps($item $edit_screen)
+	<input type="hidden" name="destination" value="$!destination"/>
+	<TR><TD COLSPAN=2 ALIGN=center><input type="button" onclick="javascript:history.go(-1)" value="Back">
+	&nbsp;&nbsp;&nbsp;
+    <input type="submit" name="eventSubmit_doSetup" id="eventSubmit_doSetup" value="Submit" disabled="true"/></TD></TR>
+</table>
+
+#if( $!item.getProperty("ID") != "")
+	<h3>Experiments</h3>
+    <br>
+    <div id="divForExperiments">
+    </div>
+#end
+
+  <script type="text/javascript" LANGUAGE="javascript">
+      window.ProjectSubjectManager = new VisitNameTypeSelector();
+      window.ProjectSubjectManager.init();
+
+      function VisitNameTypeSelector() {
+          this.projectSelect = 'xnat:pVisitData/project';
+          this.subjSelect = 'xnat:pVisitData/subject_id';
+          this.submitButton = 'eventSubmit_doSetup';
+          this.defaultProject = '$!project';
+          this.defaultSubject = '$!subject_id';
+          this.visitId = '$!om.getId()';
+          this.visitNameField = document.getElementById('xnat:pVisitData/visit_name');
+          this.visitTypeSelect = document.getElementById('xnat:pVisitData/visit_type');
+          this.visitDateCalendar = document.getElementById("xnat:pVisitData/date");
+          this.visitList = [];
+          this.initialVisitList = [];
+
+          this.init = function () {
+              //load from search xml from server
+              this.initCallback = {
+                  success:this.completeInit,
+                  failure:this.initFailure,
+                  scope:this
+              };
+
+              var params = "";
+              params += "&owner=true";
+              params += "&member=true";
+
+              //noinspection JSUnresolvedVariable
+              YAHOO.util.Connect.asyncRequest('GET', serverRoot + '/data/projects?format=json&timestamp=' + (new Date()).getTime() + params, this.initCallback, null, this);
+          };
+
+          this.initFailure = function (o) {
+              this.displayError("ERROR " + o.status + ": Failed to load project list.");
+          };
+
+          this.completeInit = function (o) {
+              try {
+                  this.projectResultSet = JSON.parse(o.responseText);
+              } catch (e) {
+                  this.displayError("ERROR " + o.status + ": Failed to parse project list.");
+              }
+              try {
+                  this.renderProjects();
+              } catch (e) {
+                  this.displayError("ERROR : Failed to render project list: " + e.toString());
+              }
+
+              if(this.visitDateCalendar != null){
+                  this.visitDateCalendar.addEventListener("change", function () {
+                      //noinspection JSUnresolvedVariable
+                      window.ProjectSubjectManager.manageLaunchUploaderButton();
+                      #if ($!om.getDate())
+                      window.ProjectSubjectManager.showMessage('Warning',"Altering the date of a visit may causes errors in the sequence of a subject's visits.",true)
+                      #else
+                      if (window.ProjectSubjectManager.visitList.length > 0) {
+                          var newDate = window.ProjectSubjectManager.visitDateCalendar.value;
+                          var lastDate = window.ProjectSubjectManager.visitList[window.ProjectSubjectManager.visitList.length - 1].date;
+                          if (new Date(newDate) < new Date(lastDate)) {
+                              window.ProjectSubjectManager.showMessage('Warning',"The visit you are creating has a date that comes before an existing visit.",true)
+                          }
+                      }
+                      #end
+
+                  }, false);
+                  this.visitDateCalendar.calendar.selectEvent.subscribe(function () {
+                      //noinspection JSUnresolvedVariable
+                      window.ProjectSubjectManager.manageLaunchUploaderButton();
+                      #if ($!om.getDate())
+                      window.ProjectSubjectManager.showMessage('Warning',"Altering the date of a visit may causes errors in the sequence of a subject's visits.",true)
+                      #else
+                      if (window.ProjectSubjectManager.visitList.length > 0) {
+                          var newDate = window.ProjectSubjectManager.visitDateCalendar.value;
+                          var lastDate = window.ProjectSubjectManager.visitList[window.ProjectSubjectManager.visitList.length - 1].date;
+                          if (new Date(newDate) < new Date(lastDate)) {
+                              window.ProjectSubjectManager.showMessage('Warning',"The visit you are creating has a date that comes before an existing visit.",true)
+                          }
+                      }
+                      #end
+
+                  }, this.visitDateCalendar, false);
+              }
+          };
+
+          this.renderProjects = function () {
+              //noinspection JSUnresolvedVariable
+              if (this.projectResultSet.ResultSet.Result.length == 0) {
+
+              } else {
+                  this.projectBox = document.getElementById(this.projectSelect);
+                  this.projectBox.options[0] = new Option("SELECT", "");
+
+                  //noinspection JSUnresolvedVariable
+                  for (var pC = 0; pC < this.projectResultSet.ResultSet.Result.length; pC++) {
+                      //noinspection JSUnresolvedVariable
+                      var defaultSelected = !!(this.projectResultSet.ResultSet.Result[pC].id == this.defaultProject);
+                      //noinspection JSUnresolvedVariable
+                      this.projectBox.options[pC + 1] = new Option(this.projectResultSet.ResultSet.Result[pC].secondary_id, this.projectResultSet.ResultSet.Result[pC].id, defaultSelected, defaultSelected);
+                      if (defaultSelected) {
+                          this.projectBox.selectedIndex = (this.projectBox.options.length - 1);
+                      }
+                  }
+
+                  this.projectBox.disabled = false;
+
+                  this.projectBox.manager = this;
+
+                  this.projectBox.onchange = function () {
+                      this.manager.projectID = this.options[this.selectedIndex].value;
+                      this.manager.loadSubjects();
+                      this.manager.manageLaunchUploaderButton();
+                  };
+
+                  this.projectBox.onchange();
+              }
+
+          };
+
+          this.loadSubjects = function () {
+              try {
+                  var subjCallback = {
+                      success:function (o) {
+                          try {
+                              o.argument.subjectResultSet = JSON.parse(o.responseText);
+                              //noinspection JSUnresolvedVariable
+                              o.argument.subjectResultSet.ResultSet.Result.sort(function (a, b) {
+                                  if (a["label"] < b["label"]) {
+                                      return -1;
+                                  } else if (b["label"] < a["label"]) {
+                                      return 1;
+                                  } else {
+                                      return 0;
+                                  }
+                              });
+
+                          } catch (e) {
+                              o.argument.displayError("ERROR " + o.status + ": Failed to parse subject list.");
+                          }
+                          try {
+                              o.argument.renderSubjects();
+                          } catch (e) {
+                              o.argument.displayError("ERROR : Failed to render subject list.");
+                          }
+                      },
+                      failure:function () {
+                          xModalMessage('Error', 'Failed to load subjects.');
+                      },
+                      argument:this
+                  };
+
+                  if (this.subjectBox != undefined) {
+                      this.subjectBox.disabled = true;
+
+                      while (this.subjectBox.length > 0) {
+                          this.subjectBox.remove(0);
+                      }
+                  }
+
+                  //noinspection JSUnresolvedVariable
+                  YAHOO.util.Connect.asyncRequest('GET', serverRoot + '/data/projects/' + this.projectID + '/subjects?format=json&timestamp=' + (new Date()).getTime(), subjCallback);
+              } catch (e) {
+                  xModalMessage('Error', 'Failed to load subjects.');
+              }
+          };
+
+          this.renderSubjects = function () {
+              this.subjectBox = document.getElementById(this.subjSelect);
+              this.subjectBox.options.length = 0;
+              this.subjectBox.options[0] = new Option("SELECT", "");
+              this.subjectBox.options[0].style.color = "black";
+
+              if (this.projectID) {
+                  this.subjectBox.disabled = false;
+
+                  if (this.subjectResultSet.ResultSet.Result.length == 0) {
+                      this.subjectBox.options[0] = new Option("No subjects found", "");
+                      this.subjectBox.options[0].style.color = "black";
+                  }
+              }
+              else {
+                  this.subjectBox.disabled = true;
+              }
+
+              //noinspection JSUnresolvedVariable
+              for (var sC = 0; sC < this.subjectResultSet.ResultSet.Result.length; sC++) {
+                  //noinspection JSUnresolvedVariable
+                  var result = this.subjectResultSet.ResultSet.Result[sC];
+                  var defaultSelected = !!(result.ID == this.defaultSubject || result["label"] == this.defaultSubject);
+                  var _label = result["label"];
+                  _label = (_label == undefined || _label == "") ? result.ID : _label;
+                  this.subjectBox.options[sC + 1] = new Option(_label, result.ID, defaultSelected, defaultSelected);
+                  this.subjectBox.options[sC + 1].style.color = "black";
+                  if (defaultSelected) {
+                      this.subjectBox.selectedIndex = (this.subjectBox.options.length - 1);
+                      this.subjectID = this.subjectBox.options[this.subjectBox.selectedIndex].value;
+                  }
+              }
+
+              this.subjectBox.submitButton = this.submitButton;
+              this.subjectBox.manager = this;
+              this.subjectBox.onchange = function () {
+                  if (YAHOO.env.ua.gecko > 0) {
+                      this.style.color = this.options[this.selectedIndex].style.color;
+                  }
+                  this.manager.subjectID = this.options[this.selectedIndex].value;
+                  this.manager.loadVisitInfo();
+                  this.manager.manageLaunchUploaderButton();
+              }
+              this.subjectBox.onchange();
+          };
+
+          this.loadVisitInfo = function () {
+              try {
+                  var protoCallback = {
+                      success:function (o) {
+                          try {
+                              o.argument.visitList = JSON.parse(o.responseText);
+
+                          } catch (e) {
+                              o.argument.displayError("ERROR " + o.status + ": Failed to parse visitList.");
+                          }
+                          try {
+                              o.argument.renderVisitName();
+                              o.argument.loadInitialVisits();
+                          } catch (e) {
+                              o.argument.displayError("ERROR : Failed to render visit type list.");
+                          }
+                      },
+                      failure:function () {
+                          xModalMessage('Error', 'Failed to load visitList.');
+                      },
+                      argument:this
+                  };
+
+                  if (this.subjectID) {
+                      var visitURL = serverRoot + '/data/projects/' + this.projectID + '/subjects/' + this.subjectID + '/visits';
+
+                      YAHOO.util.Connect.asyncRequest('GET', visitURL, protoCallback);
+                  } else {
+                      this.visitList = [];
+                      this.initialVisitList = [];
+                      this.renderVisitName();
+                      this.renderVisitTypes();
+                  }
+              } catch (e) {
+                  xModalMessage('Error', 'Failed to load visit list.');
+              }
+          };
+
+          this.loadInitialVisits = function () {
+              try {
+                  var protoCallback = {
+                      success:function (o) {
+                          try {
+                              o.argument.initialVisitList = JSON.parse(o.responseText);
+                          } catch (e) {
+                              o.argument.displayError("ERROR " + o.status + ": Failed to parse initialVisitList.");
+                          }
+                          try {
+                              o.argument.renderVisitTypes();
+                          } catch (e) {
+                              o.argument.displayError("ERROR : Failed to render visit type list.");
+                          }
+                      },
+                      failure:function () {
+                          xModalMessage('Error', 'Failed to load visitList.');
+                      },
+                      argument:this
+                  };
+                  var visitURL = serverRoot + '/data/projects/' + this.projectID + '/subjects/' + this.subjectID + '/visits?initial=true';
+                  YAHOO.util.Connect.asyncRequest('GET', visitURL, protoCallback);
+              } catch (e) {
+                  xModalMessage('Error', 'Failed to load visit list.');
+              }
+          };
+
+          this.renderVisitName = function () {
+              for (var visitCount = 0; visitCount < this.visitList.length; visitCount++) {
+                  var localVisit = this.visitList[visitCount];
+                  if (localVisit.id === this.visitId) {
+                      this.visit = localVisit;
+                  }
+              }
+
+              if (this.subjectID) {
+                  this.visitNameField.disabled = false;
+                  if (this.visit) {
+                      this.visitNameField.value = this.visit.name;
+                  }
+                  else {
+                      this.visitNameField.value = this.visitList.length + 1;
+                  }
+              }
+              else {
+                  this.visitNameField.disabled = true;
+              }
+
+              this.visitNameField.submitButton = this.submitButton;
+              this.visitNameField.manager = this;
+              this.visitNameField.onchange = function () {
+                  if (YAHOO.env.ua.gecko > 0) {
+                      this.style.color = this.options[this.selectedIndex].style.color;
+                  }
+                  this.manager.manageLaunchUploaderButton();
+                  // check to see if the visit name is a duplicate
+                  for (var visitCount = 0; visitCount < this.manager.visitList.length; visitCount++) {
+                      var localVisit = this.manager.visitList[visitCount];
+                      if (localVisit.id != this.manager.visitId && localVisit.name === this.manager.visitNameField.value) {
+                          this.manager.showMessage('Warning',"Another visit already has this name. Please give this visit a distinct name.",true)
+                      }
+                  }
+              };
+              this.visitNameField.onchange();
+          };
+
+          this.renderVisitTypes = function () {
+              this.visitTypeSelect.options.length = 0;
+              this.visitTypeSelect.options[0] = new Option("SELECT", "", true, true);
+              this.visitTypeSelect.options[0].style.color = "black";
+
+              var result = [];
+              if (this.visitList.length < 1) {
+                  result = this.initialVisitList;
+              }
+              else {
+                  #if ($!om.getVisitType())
+                  // find immediate prior visit
+                  var priorVisit;
+                  for (var visitCount = 0; visitCount < this.visitList.length; visitCount++) {
+                      var localVisit = this.visitList[visitCount];
+                      if (localVisit.id === this.visitId) {
+                          break;
+                      }
+                      priorVisit = localVisit;
+                  }
+                  #else
+                  // get last visit
+                  var priorVisit = this.visitList[this.visitList.length-1];
+                  #end
+                  if (priorVisit) {
+console.log("\n\n\tRemove reference to nextVisits (in XDATScreen_edit_xnat_pVisitDaia.vm line: 487)?: "+priorVisit.nextVisits);
+                      result = priorVisit.nextVisits;
+                  }
+                  else {
+                      result = this.initialVisitList;
+                  }
+              }
+              if (result) {
+                  this.visitTypeSelect.disabled = false;
+
+                  if (result.length == 0) {
+                      this.visitTypeSelect.options[0] = new Option("No valid visit types defined", "", true, true);
+                      this.visitTypeSelect.options[0].style.color = "black";
+                  }
+              }
+              else {
+                  this.visitTypeSelect.disabled = true;
+              }
+
+              var defaultVisitType = "$!om.getVisitType()";
+              var defaultPresent = false;
+              for (var sC = 0; sC < result.length; sC++) {
+                  var label = result[sC];
+                  var defaultSelected = defaultVisitType && (label === defaultVisitType);
+                  this.visitTypeSelect.options[sC + 1] = new Option(XNAT.utils.unescapeXML(label), label, defaultSelected, defaultSelected);
+                  this.visitTypeSelect.options[sC + 1].style.color = "black";
+
+                  if (defaultSelected) {
+                      defaultPresent = true;
+                      this.visitTypeSelect.selectedIndex = (this.visitTypeSelect.options.length - 1);
+                  }
+              }
+              if (!defaultPresent && defaultVisitType) {
+                  this.visitTypeSelect.options[this.visitTypeSelect.options.length] = new Option(XNAT.utils.unescapeXML(defaultVisitType) + " (Invalid Type)", defaultVisitType, true, true);
+              }
+
+              this.visitTypeSelect.submitButton = this.submitButton;
+              this.visitTypeSelect.manager = this;
+              this.visitTypeSelect.onchange = function () {
+                  #if ($!om.getVisitType())
+                  this.manager.showMessage('Warning', 'Changing the type of an existing visit may cause subsequent visits to be considered to have an invalid type.', true);
+                  #end
+                  this.manager.manageLaunchUploaderButton();
+              };
+          };
+
+          /**
+           * This function takes an activate parameter. If the value of that parameter is null, the function will run through
+           * a series of validity test of the criteria currently set in the input form. If the criteria is valid, the submit
+           * button will be activated. Otherwise, if the value of the activate parameter is set to a boolean, the
+           * button is activated if the value is true, and deactivated otherwise.
+           * @param activate Indicates whether to activate the submit button. Set to null to force validity tests.
+           */
+          this.manageLaunchUploaderButton = function (activate) {
+              var button = document.getElementById(this.submitButton);
+              if (button) {
+                  if (activate == null) {
+                      activate = this.validateVisitCriteria();
+                  }
+                  button.disabled = !activate;
+              }
+          };
+
+          this.validateVisitCriteria = function () {
+              //date is taken care of by XNAT.
+              var bSessionDate = document.getElementById("xnat:pVisitData/date").value != "";
+              var visitNameField = document.getElementById("xnat:pVisitData/visit_name").value != "";
+              var visitTypeIdx = document.getElementById("xnat:pVisitData/visit_type").selectedIndex;
+              var projectIdx = document.getElementById("xnat:pVisitData/project").selectedIndex; //even though they're hidden half the time, the select boxes are still there.
+              var subjectIdx = document.getElementById("xnat:pVisitData/subject_id").selectedIndex; //even though they're hidden half the time, the select boxes are still there.
+              if( !bSessionDate ||  !visitNameField || visitTypeIdx == 0 || projectIdx == 0 || subjectIdx == 0){
+                  return false;
+              } else {
+                  return true;
+              }
+
+          }
+
+          this.showMessage = function (title, message, confirmOnly) {
+              var buttonArray;
+              if (!confirmOnly) {
+                  buttonArray = [{ text:'Yes', handler:handleYes, isDefault:true },
+                      { text:'No', handler:handleNo }];
+              } else {
+                  buttonArray = [{ text:'OK', handler:handleOK, isDefault:true }];
+              }
+              var dialog = new YAHOO.widget.SimpleDialog("dialog", {
+                  width:"20em",
+                  close:false,
+                  fixedcenter:true,
+                  constraintoviewport:true,
+                  modal:true,
+                  icon:YAHOO.widget.SimpleDialog.ICON_WARN,
+                  visible:true,
+                  draggable:false,
+                  buttons: buttonArray
+              });
+
+              dialog.manager = this;
+              dialog.render(document.getElementById('layout_content'));
+              dialog.setHeader(title);
+              dialog.setBody(message);
+              dialog.bringToTop();
+              dialog.show();
+
+              function handleYes() {
+                  this.hide();
+                  this.manager.manageLaunchUploaderButton(true);
+              }
+
+              function handleNo() {
+                  this.hide();
+                  this.manager.manageLaunchUploaderButton(false);
+              }
+
+              function handleOK() {
+                  this.hide();
+              }
+          }
+      }
+  </script>
+</form>
+</p>

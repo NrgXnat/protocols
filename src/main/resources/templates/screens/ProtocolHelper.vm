@@ -1,0 +1,37 @@
+
+#if($project)
+
+#else
+  #set($project = $!om.getProject())
+#end
+
+#if($!SubjectVisitInfo.getProtocol())
+
+<script>
+var dataTypeOptions = { '':'[SELECT]'
+#foreach($dt in $dataTypeOptions)
+    , '$dt.getValue()':'$dt.getLabel()'
+#end
+};
+var assessorTypeOptions = { '':'[SELECT]'
+#foreach($at in $assessorTypeOptions)
+    , '$at.getValue()':'$at.getLabel()'
+#end
+};
+XNAT.data.page.protocol = $jsonProtocol; // this may end up disappearing from the DOM
+XNAT.data.page.subject = { visits: $jsonVisits, unexpectedVisits: $jsonUnexpectedVisits }; // this may end up disappearing from the DOM
+</script>
+
+<div id="visitController" ng-controller="SubjectVisitController" class="ng-cloak">
+#parse($turbineUtils.getTemplateName("_assessors_protocolAware","xnat:subjectData",$project))
+#parse($turbineUtils.getTemplateName("_visits","xnat:subjectData",$project))
+</div>
+
+#elseif($!MissingDataType)
+<script>
+alert('Warning: This project has an invalid protocol assigned to it with the following missing data type: '+$!MissingDataType+
+'\n\nContact the project owner or system administrator for resolution.');
+</script>
+#else
+NOPROTOCOL
+#end

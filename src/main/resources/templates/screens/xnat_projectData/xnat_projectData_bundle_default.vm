@@ -1,0 +1,12 @@
+#set($match=false)
+#foreach($bundle in $bundles)
+    #if($bundle.getBriefDescription().startsWith("Visit: "))
+    	#set($match=true)
+        window.tab_manager.load({ID:'$bundle.getId()'});
+    #end
+#end
+#if(!$match)
+    window.tab_manager.load({ID:'$default_search'});
+#else
+
+#end

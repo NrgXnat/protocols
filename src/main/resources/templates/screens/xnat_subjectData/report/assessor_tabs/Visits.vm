@@ -1,0 +1,140 @@
+<!-- title: Visits &amp; Experiments -->
+<!-- divName: Visits &amp; Experiments -->
+
+#if($project)
+
+#else
+    #set($project = $!om.getProject())
+#end
+
+#if($subject_id)
+
+#else
+    #set($subject_id = $!om.getId())
+#end
+<script>
+
+YAHOO.util.Event.onDOMReady( function() {
+  var callback={
+    success:function(oResponse){
+      if(oResponse.responseText.indexOf("NOPROTOCOL") == -1)
+			//TODO: FIX THIS ...if the string "NOPROTOCOL" ends up anywhere in the response, this page will act as if no protocol is associated
+      {
+				$('<div id="visitApp" ng-app="subjectVisits"></div>').insertBefore('#assessor_tabs');
+        $("#visitApp").html(oResponse.responseText);
+				$('#assessor_tabs').hide();  // Removing this instead of hiding it also removes all DOM elements defined further down on the page
+				angular.bootstrap(document, ['subjectVisits']);
+      } else {
+				$("#hideAssessors").show();
+        XNAT.app.assessor_tabs.assessor_tab_summary.removeTab(XNAT.app.assessor_tabs.assessor_tab_summary.getTab(0));
+      }			
+      closeModalPanel("load_history");
+    },
+    failure:function(oResponse){
+      closeModalPanel("load_history");
+      xModalMessage('Error', oResponse);
+    }
+  };
+
+  openModalPanel("load_history","Retrieving Visit Data...");
+  YAHOO.util.Connect.asyncRequest('GET',serverRoot +'/app/template/ProtocolHelper.vm/search_value/$om.getId()/search_element/xnat:subjectData/search_field/xnat:subjectData.ID/project/$project',callback,null);
+});
+</script>
+
+#parse("/screens/VisitFunctions.vm")
+<div id="hideAssessors" style="display:none">
+</div>  <!-- hideAssessors end -->
+
+
+
+<script type="text/ng-template" id="template.dialog.openVisit">
+	<div class="dialog-header-warning" ng-show="cachedVisit.terminal"><span class="icon icon-sm icon-alert"/>&nbsp;{{dialog.openVisit.labels.lastVisitTerminalWarning}}</div>
+	<div class="dialogHeader"><span ng-bind="addEdit"/> <span ng-bind="labels.expected"/> <span ng-bind="labels.visit"/></div>
+	<p class="dialog-description" ng-bind-html="dialog.openVisit.labels.description"></p>
+	<br>
+	<table class="highlightHelpLayout ad-hoc-subject-visit"><tbody>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.openVisit.labels.date.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<span id="adHocDatePicker" class="single future us" data-validate="onblur" data-input-id="adHocDateInput" data-input-name="adHocDateInput"><input type="text" id="adHocDateInput" name="adHocDateInput" class="ez_cal single date validate onblur us" ng-model="cachedVisit.date" style="width: 100px"/></span>&nbsp;&nbsp;<span class="icon icon-sm icon-event" ng-click="openCalendar()"/>
+			</td>
+			<td class="validation-error protocol-directions" ng-show="dialog.openVisit.labels.validationErrors.date" ng-bind="dialog.openVisit.labels.validationErrors.date"></td>
+			<td class="protocol-directions" ng-hide="dialog.openVisit.labels.validationErrors.date" ng-bind-html="dialog.openVisit.labels.date.directions"></td>
+		</tr>
+		<!-- add optional visit name field here -->
+		<!-- tr>
+			<td class="protocol-label" colspan="2">
+				<input type="checkbox" ng-model="cachedVisit.terminal" ng-disabled="!protocol.allowUnexpectedAdHocVisits"/>&nbsp;&nbsp;<label class="protocol-label" style="display: inline; position: relative; top: -2px;">{{dialog.openVisit.labels.terminal.field}}</label>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.openVisit.labels.terminal.directions"></td>
+		</tr -->
+	<tbody></table>
+</script>
+<script type="text/ng-template" id="template.dialog.adHocSubjectVisit">
+	<div class="dialog-header-warning" ng-show="cachedVisit.terminal"><span class="icon icon-sm icon-alert"/>&nbsp;{{dialog.adHocSubjectVisit.labels.terminalWarning}}</div>
+	<div class="dialogHeader">{{dialog.adHocSubjectVisit.labels.header}}</div>
+	<p class="dialog-description" ng-bind-html="dialog.adHocSubjectVisit.labels.description"></p>
+	<br>
+	<table class="highlightHelpLayout ad-hoc-subject-visit"><tbody>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.adHocSubjectVisit.labels.name.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input type="text" ng-model="cachedVisit.name" style="width: 100%"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.adHocSubjectVisit.labels.name.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.adHocSubjectVisit.labels.date.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<span id="adHocDatePicker" class="single us" data-validate="onblur" data-input-id="adHocDateInput" data-input-name="adHocDateInput"><input type="text" id="adHocDateInput" name="adHocDateInput" class="ez_cal single date validate onblur us" ng-model="cachedVisit.date" style="width: 100px"/></span>&nbsp;&nbsp;<span class="icon icon-sm icon-event" ng-click="openCalendar()"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.adHocSubjectVisit.labels.date.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label" style="width: 100px;">
+				<label class="protocol-label">{{dialog.adHocSubjectVisit.labels.offset.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input type="text" ng-model="cachedVisit.delta" style="width: 50px" disabled/>&nbsp;{{dialog.adHocSubjectVisit.labels.deltaUnits}}
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.adHocSubjectVisit.labels.offset.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label" colspan="2">
+				<input type="checkbox" ng-model="cachedVisit.terminal" ng-disabled="!protocol.allowUnexpectedAdHocVisits"/>&nbsp;&nbsp;<label class="protocol-label" style="display: inline; position: relative; top: -2px;">{{dialog.adHocSubjectVisit.labels.terminal.field}}</label>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.adHocSubjectVisit.labels.terminal.directions"></td>
+		</tr>
+	<tbody></table>
+</script>
+<script type="text/ng-template" id="template.dialog.confirm.removeExperimentDeviation">
+	<div class="dialogHeader" ng-bind="dialog.confirm.removeExperimentDeviation.labels.question"></div>
+	<br>
+	<ul style="list-style-type: none;">
+		<li ng-show="deviation.visit.type"><span class="bold" ng-bind="dialog.confirm.removeExperimentDeviation.labels.directions.visit"/>: <span ng-bind="deviation.visit.type"/></li>
+		<li ng-show="deviation.experiment"><span class="bold" ng-bind="dialog.confirm.removeExperimentDeviation.labels.directions.experiment"/>: <span ng-bind="deviation.experiment.name"/></li>
+		<li ng-show="deviation.subtype">&nbsp;&nbsp;-&nbsp;<span class="bold" ng-bind="dialog.confirm.removeExperimentDeviation.labels.directions.subtype"/>: <span ng-bind="deviation.subtype"/></li>
+		<li ng-show="deviation.assessor">&nbsp;&nbsp;-&nbsp;<span class="bold" ng-bind="dialog.confirm.removeExperimentDeviation.labels.directions.assessor"/>: <span ng-bind="deviation.assessor.name"/></li>
+	</ul>
+</script>
+
+
+
+<link rel='stylesheet' href='$content.getURI("style/protocols.css")' />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script -->
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.js"></script>
+<script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
+<script src="$content.getURI('')/scripts/protocols/common.js"></script>
+<script src="$content.getURI('')/scripts/protocols/visits.js"></script>
+<script src="$content.getURI('')/scripts/protocols/services.js"></script>
+<script src="$content.getURI('')/scripts/protocols/directives.js"></script>
+<script src="$content.getURI('')/scripts/protocols/i18n/angular-locale_en-US.js"></script>

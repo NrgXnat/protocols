@@ -1,0 +1,15 @@
+<div class="dialogHeader">{{dialog.missingDataTypes.labels.header}}</div>
+<br>
+<div>
+	<ul>
+		<li ng-repeat="missingDataType in missingDataTypes">
+			<span ng-bind="missingDataType.type" class="error bold"></span>
+		</li>
+		<li ng-repeat="missingAssessor in missingAssessors">
+			<span ng-bind="dataTypeOptions[missingAssessor.parentExperiment.type]"></span>
+			<span ng-hide="dataTypeOptions[missingAssessor.parentExperiment.type]" ng-bind="missingAssessor.parentExperiment.type" class="error bold"></span>
+			<span ng-show="missingAssessor.parentExperiment.subtype"> - <span ng-bind="missingAssessor.parentExperiment.subtype"></span></span>
+			<br>&nbsp;&nbsp;-&nbsp;&nbsp;<span ng-bind="missingAssessor.type" class="error bold"></span>
+		</li>
+	</ul>
+</div>

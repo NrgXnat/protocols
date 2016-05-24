@@ -1,0 +1,9 @@
+<div style="width:100%">
+<div class="dialogHeader">{{dialog.editProtocolSettings.labels.header}}</div>
+<br>
+<label class="protocol-label">{{labels.protocols.name}}&nbsp;&nbsp;&nbsp;<span ng-bind="labels.protocols.uniqueName" ng-class="cachedProtocol.uniqueNameRequired"></span><span ng-show="cachedProtocol.nameRequired" style="color:#ff0000;">&nbsp;&nbsp;&nbsp;{{labels.protocols.required}}</span></label>
+<input id="protocolName" type="text" ng-model="cachedProtocol.name" style="width:350px"/>
+<br><br>
+<label class="protocol-label">{{labels.protocols.description}}</label>
+<textarea id="protocolDescription" ng-model="cachedProtocol.description" cols="47" rows="3" style="width:350px"></textarea>
+</div>

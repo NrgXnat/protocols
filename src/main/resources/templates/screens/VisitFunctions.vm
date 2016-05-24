@@ -1,0 +1,742 @@
+<script>
+var jq = jQuery;
+jq.ajaxSetup({cache: false});
+
+function confirmDeleteVisit(visitID){
+      xModalConfirm({
+        content: 'Are you sure you want to delete this visit?',
+        okLabel: 'Yes',
+        cancelLabel: 'No',
+        okAction: function(){
+          deleteVisit(visitID);
+        },
+        cancelAction: function(){
+        }
+      });
+    }
+
+    function deleteVisit(visitID){
+        var callback={
+            success:function(o){
+                window.location.reload();
+            },
+            failure:function(o){
+                xModalMessage("Cannot Delete Visit",o.responseText);
+            }
+        };
+        var url = '/REST/projects/$project/visits/' + visitID + '?XNAT_CSRF=' + csrfToken + '&xnatstamp=' + (new Date()).getTime();
+        YAHOO.util.Connect.asyncRequest('DELETE',serverRoot + url,callback,null);
+    }
+
+    function openVisit(visitID){
+        var callback={
+            success:function(o){
+                window.location.reload();
+            },
+            failure:function(o){
+                xModalMessage("Error",o.responseText);
+            }
+        };
+        var url = '/REST/projects/$project/visits/' + visitID + '?open=true&XNAT_CSRF=' + csrfToken + '&xnatstamp=' + (new Date()).getTime();
+        YAHOO.util.Connect.asyncRequest('POST',serverRoot + url,callback,null);
+    }
+
+    function closeVisit(visitID){
+        var callback={
+            success:function(o){
+                window.location.reload();
+            },
+            failure:function(o){
+                xModalMessage("Cannot Close Visit",o.responseText);
+            }
+        };
+        var url = '/REST/projects/$project/visits/' + visitID + '?close=true&XNAT_CSRF=' + csrfToken + '&xnatstamp=' + (new Date()).getTime();
+        YAHOO.util.Connect.asyncRequest('POST',serverRoot + url,callback,null);
+    }
+
+    function setLocation(href) {
+        if(typeof href === "undefined") return false;
+        window.location.assign(href);
+    }
+
+    function removeFromVisit(visitId, exptID){
+        var callback={
+            success:function(o){
+                window.location.reload()
+            },
+            failure:function(o){
+                xModalMessage("Cannot Remove Experiment From Visit",o.responseText);
+            }
+        };
+        var url = '/REST/projects/$project/subjects/$subject_id/experiments/' + exptID + '/visit/' + visitId + '?XNAT_CSRF=' + csrfToken + '&stamp=' + (new Date()).getTime();
+        YAHOO.util.Connect.asyncRequest('DELETE',serverRoot + url,callback,null);
+    }
+
+    function removeExperimentDeviationConfirmed(visitId, xsiType, subtype){
+        var callback={
+            success:function(o){
+                window.location.reload()
+            },
+            failure:function(o){
+                xModalMessage("Cannot Remove Deviation From Visit",o.responseText);
+            }
+        };
+        var subtypeString = '';
+        if (subtype) {
+            subtypeString = '&subtype=' + encodeURIComponent(subtype);
+        }
+        var url = '/REST/projects/$project/subjects/$subject_id/visits/' + visitId + '/exceptions?xsiType=' + xsiType + subtypeString + '&XNAT_CSRF=' + csrfToken + '&stamp=' + (new Date()).getTime();
+        YAHOO.util.Connect.asyncRequest('DELETE',serverRoot + url,callback,null);
+    }
+
+    function openExceptionDialog(visitId, xsiType, subtype) {
+        var callback={
+            success:function(o){
+                window.location.reload()
+            },
+            failure:function(o){
+                window.location.reload();
+            }
+        };
+        var subtypeString = '';
+        if (subtype) {
+            subtypeString = '&subtype=' + encodeURIComponent(subtype);
+        }
+        var url = '/REST/projects/$project/subjects/$subject_id/visits/' + visitId + '/exceptions?xsiType=' + xsiType + subtypeString + '&XNAT_CSRF=' + csrfToken + '&stamp=' + (new Date()).getTime();
+        var options = "";
+    ## var reasonField = '<label for="reason">Reason:</label><select id="reason" name="reason">' +$('#reasonTemplate').html() + '</select><br/><br/>';
+        var explanationField = '<label for="explanation">Explanation:</label><br><textarea id="explanation" name="explanation" rows="10" cols="71" maxlength="255" style="height:155px; width:455px;" required/>';
+        var exceptionHtml = #*reasonField +*# explanationField;
+
+        xModalMessage('Requirement Deviation', exceptionHtml, 'Create', {width:500, height: 300, action:function(){YAHOO.util.Connect.asyncRequest('POST',serverRoot + url #*+ '&reason=' + $('#reason').val()*# + '&explanation=' + encodeURIComponent($('#explanation').val()),callback,null);}});
+    }
+
+    function displayExplanationDialog(reason, explanation) {
+    ##var reasonHtml = '<label for="reason">Reason: </label><span id="reason">' + reason + '</span><br/><br/>';
+        var explanationHtml = '<label for="explanation">Explanation: </label><p id="explanation">' + explanation + '</p>';
+
+        var exceptionHtml = #*reasonHtml +*# explanationHtml;
+
+        xModalMessage('Requirement Deviation', exceptionHtml, 'Close', {width:500, height: 300});
+    }
+
+    function addToVisit(visitId, exptID, selector){
+
+        var callback={
+            success:function(o){
+                window.location.reload()
+            },
+            failure:function(o){
+                xModalMessage("Cannot Add Experiment To Visit",o.responseText);
+            }
+        };
+
+        var handleYes = function() {
+            this.hide();
+            var url = '/REST/projects/$project/subjects/$subject_id/experiments/' + exptID +  '/visit/' + visitId + '?XNAT_CSRF=' + csrfToken + '&stamp=' + (new Date()).getTime();
+            YAHOO.util.Connect.asyncRequest('PUT',serverRoot + url,callback,null);
+        };
+
+        var handleNo = function() {
+            selector.options[0].selected = true;
+            this.hide();
+        };
+        if(visitId == -1){
+            return;
+        }
+        var dialog = new YAHOO.widget.SimpleDialog("dialogPanel",
+                { width: "300px",
+                    fixedcenter: true,
+                    visible: false,
+                    draggable: false,
+                    close: true,
+                    text: "Are you sure you want to add this experiment to a visit?",
+                    icon: YAHOO.widget.SimpleDialog.ICON_HELP,
+                    constraintoviewport: true,
+                    buttons: [ { text:"Yes", handler:handleYes, isDefault:true },
+                        { text:"No",  handler:handleNo } ]
+                }
+        );
+
+        // only way to get clicking x to close the dialog to also reset the dropdown
+        YAHOO.util.Event.removeListener(dialog.close, "click");
+        YAHOO.util.Event.addListener(dialog.close, "click", selector.options[0].selected = true);
+        dialog.manager = this;
+        dialog.render(document.getElementById('layout_content'));
+        dialog.setHeader("Add Experiment to Visit");
+        dialog.bringToTop();
+        dialog.show();
+    }
+/*
+    function doVisitAction(select) {
+           // get the "action" and "param" data attributes on the selected visit action option, and do the action
+           var action = $(select).find('option:selected').data('action');
+           var param = $(select).find('option:selected').data('param');
+           console.log('action: ' + action, 'param: ' + param);
+           if (!action || !param) return false;
+
+           switch (action) {
+               case 'openVisit':
+                   openVisit(param);
+                   break;
+               case 'closeVisit':
+                   closeVisit(param);
+                   break;
+               case 'editVisit':
+                   editVisitModal(param);
+                   // window.location.assign(param);
+                   break;
+               case 'confirmDeleteVisit':
+                   confirmDeleteVisit(param);
+                   break;
+               default:
+                   alert("Sorry, I'm not sure what you want to do with action '" + action + "' and parameter '" + param + "'.");
+           }
+    }
+*/
+    /* Edit Visit controls */
+    function VisitNameTypeSelector(visitID) {
+        // this.projectSelect = 'xnat:pVisitData/project';
+        // this.subjSelect = 'xnat:pVisitData/subject_id';
+        this.submitButton = 'eventSubmit_doSetup';
+        // this.defaultProject = '$!project';
+        // this.defaultSubject = '$!subject.getId()';
+        this.projectID = '$!project';
+        this.subjectID = '$!subject.getId()';
+        // this.visitId = '$!om.getId()';
+        this.visitId = visitID;
+        this.visitIdField = document.getElementById('xnat:pVisitData/id');
+        this.visitNameField = document.getElementById('xnat:pVisitData/visit_name');
+        this.visitTypeSelect = document.getElementById('xnat:pVisitData/visit_type');
+        this.visitDateCalendar = document.getElementById("xnat:pVisitData/date");
+        this.visitList = [];
+        this.initialVisitList = [];
+
+        this.init = function () {
+            //load from search xml from server
+            this.initCallback = {
+                success:this.completeInit,
+                failure:this.initFailure,
+                scope:this
+            };
+
+            var params = "";
+            params += "&owner=true";
+            params += "&member=true";
+
+            //noinspection JSUnresolvedVariable
+            YAHOO.util.Connect.asyncRequest('GET', serverRoot + '/data/projects?format=json&timestamp=' + (new Date()).getTime() + params, this.initCallback, null, this);
+        };
+
+        this.initFailure = function (o) {
+            this.displayError("ERROR " + o.status + ": Failed to load project list.");
+        };
+
+        this.completeInit = function (o) {
+            /*    try {
+                    this.projectResultSet = JSON.parse(o.responseText);
+                } catch (e) {
+                    this.displayError("ERROR " + o.status + ": Failed to parse project list.");
+                } */
+            /*    try {
+                    this.renderProjects();
+                } catch (e) {
+                    this.displayError("ERROR : Failed to render project list: " + e.toString());
+                } */
+
+##            if(this.visitDateCalendar != null){
+##                this.visitDateCalendar.addEventListener("change", function () {
+##                    //noinspection JSUnresolvedVariable
+##                    window.ProjectSubjectManager.manageLaunchUploaderButton();
+##                    #if ($!om.getDate())
+##                        window.ProjectSubjectManager.showMessage('Warning',"Altering the date of a visit may cause errors in the sequence of a subject's visits.",true)
+##                    #else
+##                        if (window.ProjectSubjectManager.visitList.length > 0) {
+##                            var newDate = window.ProjectSubjectManager.visitDateCalendar.value;
+##                            var lastDate = window.ProjectSubjectManager.visitList[window.ProjectSubjectManager.visitList.length - 1].date;
+##                            if (new Date(newDate) < new Date(lastDate)) {
+##                                window.ProjectSubjectManager.showMessage('Warning',"The visit you are creating has a date that comes before an existing visit.",true)
+##                            }
+##                        }
+##                    #end
+##
+##                }, false);
+##                ## this.visitDateCalendar.calendar.selectEvent.subscribe(function () {
+##                this.visitDateCalendar.selectEvent.subscribe(function () {
+##                    //noinspection JSUnresolvedVariable
+##                    window.ProjectSubjectManager.manageLaunchUploaderButton();
+##                    #if ($!om.getDate())
+##                        window.ProjectSubjectManager.showMessage('Warning',"Altering the date of a visit may cause errors in the sequence of a subject's visits.",true)
+##                    #else
+##                        if (window.ProjectSubjectManager.visitList.length > 0) {
+##                            var newDate = window.ProjectSubjectManager.visitDateCalendar.value;
+##                            var lastDate = window.ProjectSubjectManager.visitList[window.ProjectSubjectManager.visitList.length - 1].date;
+##                            if (new Date(newDate) < new Date(lastDate)) {
+##                                window.ProjectSubjectManager.showMessage('Warning',"The visit you are creating has a date that comes before an existing visit.",true)
+##                            }
+##                        }
+##                    #end
+##
+##                }, this.visitDateCalendar, false);
+##            }
+        };
+
+        /*   this.renderProjects = function () {
+               //noinspection JSUnresolvedVariable
+               if (this.projectResultSet.ResultSet.Result.length == 0) {
+
+               } else {
+                   this.projectBox = document.getElementById(this.projectSelect);
+                   this.projectBox.options[0] = new Option("SELECT", "");
+
+                   //noinspection JSUnresolvedVariable
+                   for (var pC = 0; pC < this.projectResultSet.ResultSet.Result.length; pC++) {
+                       //noinspection JSUnresolvedVariable
+                       var defaultSelected = !!(this.projectResultSet.ResultSet.Result[pC].id == this.defaultProject);
+                       //noinspection JSUnresolvedVariable
+                       this.projectBox.options[pC + 1] = new Option(this.projectResultSet.ResultSet.Result[pC].secondary_id, this.projectResultSet.ResultSet.Result[pC].id, defaultSelected, defaultSelected);
+                       if (defaultSelected) {
+                           this.projectBox.selectedIndex = (this.projectBox.options.length - 1);
+                       }
+                   }
+
+                   this.projectBox.disabled = false;
+
+                   this.projectBox.manager = this;
+
+                   this.projectBox.onchange = function () {
+                       this.manager.projectID = this.options[this.selectedIndex].value;
+                       this.manager.loadSubjects();
+                       this.manager.manageLaunchUploaderButton();
+                   };
+
+                   this.projectBox.onchange();
+               }
+
+           }; */
+
+        /* this.loadSubjects = function () {
+            try {
+                var subjCallback = {
+                    success:function (o) {
+                        try {
+                            o.argument.subjectResultSet = JSON.parse(o.responseText);
+                            //noinspection JSUnresolvedVariable
+                            o.argument.subjectResultSet.ResultSet.Result.sort(function (a, b) {
+                                if (a["label"] < b["label"]) {
+                                    return -1;
+                                } else if (b["label"] < a["label"]) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            });
+
+                        } catch (e) {
+                            o.argument.displayError("ERROR " + o.status + ": Failed to parse subject list.");
+                        }
+                        try {
+                            o.argument.renderSubjects();
+                        } catch (e) {
+                            o.argument.displayError("ERROR : Failed to render subject list.");
+                        }
+                    },
+                    failure:function () {
+                        xModalMessage('Error', 'Failed to load subjects.');
+                    },
+                    argument:this
+                };
+
+                if (this.subjectBox != undefined) {
+                    this.subjectBox.disabled = true;
+
+                    while (this.subjectBox.length > 0) {
+                        this.subjectBox.remove(0);
+                    }
+                }
+
+                //noinspection JSUnresolvedVariable
+                YAHOO.util.Connect.asyncRequest('GET', serverRoot + '/data/projects/' + this.projectID + '/subjects?format=json&timestamp=' + (new Date()).getTime(), subjCallback);
+            } catch (e) {
+                xModalMessage('Error', 'Failed to load subjects.');
+            }
+        };
+
+        this.renderSubjects = function () {
+            this.subjectBox = document.getElementById(this.subjSelect);
+            this.subjectBox.options.length = 0;
+            this.subjectBox.options[0] = new Option("SELECT", "");
+            this.subjectBox.options[0].style.color = "black";
+
+            if (this.projectID) {
+                this.subjectBox.disabled = false;
+
+                if (this.subjectResultSet.ResultSet.Result.length == 0) {
+                    this.subjectBox.options[0] = new Option("No subjects found", "");
+                    this.subjectBox.options[0].style.color = "black";
+                }
+            }
+            else {
+                this.subjectBox.disabled = true;
+            }
+
+            //noinspection JSUnresolvedVariable
+            for (var sC = 0; sC < this.subjectResultSet.ResultSet.Result.length; sC++) {
+                //noinspection JSUnresolvedVariable
+                var result = this.subjectResultSet.ResultSet.Result[sC];
+                var defaultSelected = !!(result.ID == this.defaultSubject || result["label"] == this.defaultSubject);
+                var _label = result["label"];
+                _label = (_label == undefined || _label == "") ? result.ID : _label;
+                this.subjectBox.options[sC + 1] = new Option(_label, result.ID, defaultSelected, defaultSelected);
+                this.subjectBox.options[sC + 1].style.color = "black";
+                if (defaultSelected) {
+                    this.subjectBox.selectedIndex = (this.subjectBox.options.length - 1);
+                    this.subjectID = this.subjectBox.options[this.subjectBox.selectedIndex].value;
+                }
+            }
+
+            this.subjectBox.submitButton = this.submitButton;
+            this.subjectBox.manager = this;
+            this.subjectBox.onchange = function () {
+                if (YAHOO.env.ua.gecko > 0) {
+                    this.style.color = this.options[this.selectedIndex].style.color;
+                }
+                this.manager.subjectID = this.options[this.selectedIndex].value;
+                this.manager.loadVisitInfo();
+                this.manager.manageLaunchUploaderButton();
+            }
+            this.subjectBox.onchange();
+        }; */
+
+        this.loadVisitInfo = function () {
+            try {
+                var protoCallback = {
+                    success:function (o) {
+                        try {
+                            o.argument.visitList = JSON.parse(o.responseText);
+
+                        } catch (e) {
+                            o.argument.displayError("ERROR " + o.status + ": Failed to parse visitList.");
+                        }
+                        try {
+                            o.argument.renderVisitName();
+                            o.argument.loadInitialVisits();
+                        } catch (e) {
+                            o.argument.displayError("ERROR : Failed to render visit type list.");
+                        }
+                    },
+                    failure:function () {
+                        xModalMessage('Error', 'Failed to load visitList.');
+                    },
+                    argument:this
+                };
+
+                if (this.subjectID) {
+                    var visitURL = serverRoot + '/data/projects/' + this.projectID + '/subjects/' + this.subjectID + '/visits';
+
+                    YAHOO.util.Connect.asyncRequest('GET', visitURL, protoCallback);
+                } else {
+                    this.visitList = [];
+                    this.initialVisitList = [];
+                    this.renderVisitId();
+                    this.renderVisitName();
+                    this.renderVisitTypes();
+                }
+            } catch (e) {
+                xModalMessage('Error', 'Failed to load visit list.');
+            }
+        };
+
+        this.loadInitialVisits = function () {
+            try {
+                var protoCallback = {
+                    success:function (o) {
+                        try {
+                            o.argument.initialVisitList = JSON.parse(o.responseText);
+                        } catch (e) {
+                            o.argument.displayError("ERROR " + o.status + ": Failed to parse initialVisitList.");
+                        }
+                        try {
+                            o.argument.renderVisitTypes();
+                        } catch (e) {
+                            o.argument.displayError("ERROR : Failed to render visit type list.");
+                        }
+                    },
+                    failure:function () {
+                        xModalMessage('Error', 'Failed to load visitList.');
+                    },
+                    argument:this
+                };
+                var visitURL = serverRoot + '/data/projects/' + this.projectID + '/subjects/' + this.subjectID + '/visits?initial=true';
+                YAHOO.util.Connect.asyncRequest('GET', visitURL, protoCallback);
+            } catch (e) {
+                xModalMessage('Error', 'Failed to load visit list.');
+            }
+        };
+
+        this.renderVisitId = function() {
+            if (this.visitId) {
+                this.visitIdField.value = this.visitId;
+            }
+        };
+
+        this.renderVisitName = function () {
+            for (var visitCount = 0; visitCount < this.visitList.length; visitCount++) {
+                var localVisit = this.visitList[visitCount];
+                if (localVisit.id === this.visitId) {
+                    this.visit = localVisit;
+                }
+            }
+
+            // don't allow users to rename visits.
+            if (this.subjectID) {
+                // this.visitNameField.disabled = false;
+                if (this.visit) {
+                    this.visitNameField.value = this.visit.name;
+                }
+                else {
+                    this.visitNameField.value = this.visitList.length + 1;
+                }
+            }
+            /*
+            else {
+                this.visitNameField.disabled = true;
+            }
+            */
+
+            /*
+            this.visitNameField.submitButton = this.submitButton;
+            this.visitNameField.manager = this;
+
+            this.visitNameField.onchange = function () {
+                if (YAHOO.env.ua.gecko > 0) {
+                    this.style.color = this.options[this.selectedIndex].style.color;
+                }
+                this.manager.manageLaunchUploaderButton();
+                // check to see if the visit name is a duplicate
+                for (var visitCount = 0; visitCount < this.manager.visitList.length; visitCount++) {
+                    var localVisit = this.manager.visitList[visitCount];
+                    if (localVisit.id != this.manager.visitId && localVisit.name === this.manager.visitNameField.value) {
+                        this.manager.showMessage('Warning',"Another visit already has this name. Please give this visit a distinct name.",true)
+                    }
+                }
+            };
+            this.visitNameField.onchange();
+            */
+        };
+
+        this.renderVisitTypes = function () {
+            this.visitTypeSelect.options.length = 0;
+            this.visitTypeSelect.options[0] = new Option("SELECT", "", true, true);
+            this.visitTypeSelect.options[0].style.color = "black";
+
+            var result = [];
+            if (this.visitList.length < 1) {
+                result = this.initialVisitList;
+            }
+            else {
+            ##if ($!om.getVisitType())
+                #if ($SubjectVisitInfo.getVisits().size())
+                    // find immediate prior visit
+                    var priorVisit;
+                    for (var visitCount = 0; visitCount < this.visitList.length; visitCount++) {
+                        var localVisit = this.visitList[visitCount];
+                        if (localVisit.id === this.visitId) {
+                            break;
+                        }
+                        priorVisit = localVisit;
+                    }
+                #else
+                    // get last visit
+                    var priorVisit = this.visitList[this.visitList.length-1];
+                #end
+                if (priorVisit) {
+console.log("\n\n\tRemove reference to nextVisits (in VisitFunctions.vm line: 551)?: "+priorVisit.nextVisits);
+                    result = priorVisit.nextVisits;
+                }
+                else {
+                    result = this.initialVisitList;
+                }
+            }
+            if (result) {
+                this.visitTypeSelect.disabled = false;
+
+                if (result.length == 0) {
+                    this.visitTypeSelect.options[0] = new Option("No valid visit types defined", "", true, true);
+                    this.visitTypeSelect.options[0].style.color = "black";
+                }
+            }
+            else {
+                this.visitTypeSelect.disabled = true;
+            }
+
+            // var defaultVisitType = "$!om.getVisitType()";
+            var defaultVisitType = this.visit.type || false;
+            var defaultPresent = false;
+            for (var sC = 0; sC < result.length; sC++) {
+                var label = result[sC];
+                var defaultSelected = defaultVisitType && (label === defaultVisitType);
+                this.visitTypeSelect.options[sC + 1] = new Option(unescapeXML(label), label, defaultSelected, defaultSelected);
+                this.visitTypeSelect.options[sC + 1].style.color = "black";
+
+                if (defaultSelected) {
+                    defaultPresent = true;
+                    this.visitTypeSelect.selectedIndex = (this.visitTypeSelect.options.length - 1);
+                }
+            }
+            if (!defaultPresent && defaultVisitType) {
+                this.visitTypeSelect.options[this.visitTypeSelect.options.length] = new Option(unescapeXML(defaultVisitType) + " (Invalid Type)", defaultVisitType, true, true);
+            }
+
+            this.visitTypeSelect.submitButton = this.submitButton;
+            this.visitTypeSelect.manager = this;
+            this.visitTypeSelect.onchange = function () {
+            ##if ($!om.getVisitType())
+                if (this.visit.type) {
+                    this.manager.showMessage('Warning', 'Changing the type of an existing visit may cause subsequent visits to be considered to have an invalid type.', true);
+                }
+            ##end
+                this.manager.manageLaunchUploaderButton();
+            };
+        };
+
+        function unescapeXML(unsafe) {
+            if (unsafe)
+                return unsafe
+                        .replace(/&amp;/g, "&")
+                        .replace(/&lt;/g, "<")
+                        .replace(/&gt;/g, ">")
+                        .replace(/&quot;/g, '"')
+                        .replace(/&apos;/g, "'");
+            return '';
+        }
+
+        /**
+         * This function takes an activate parameter. If the value of that parameter is null, the function will run through
+         * a series of validity test of the criteria currently set in the input form. If the criteria is valid, the submit
+         * button will be activated. Otherwise, if the value of the activate parameter is set to a boolean, the
+         * button is activated if the value is true, and deactivated otherwise.
+         * @param activate Indicates whether to activate the submit button. Set to null to force validity tests.
+         */
+        this.manageLaunchUploaderButton = function (activate) {
+            var button = document.getElementById(this.submitButton);
+            if (button) {
+                if (activate == null) {
+                    activate = this.validateVisitCriteria();
+                }
+                button.disabled = !activate;
+            }
+        };
+
+        this.validateVisitCriteria = function () {
+            //date is taken care of by XNAT.
+            var bSessionDate = document.getElementById("xnat:pVisitData/date").value != "";
+            var visitNameField = document.getElementById("xnat:pVisitData/visit_name").value != "";
+            var visitTypeIdx = document.getElementById("xnat:pVisitData/visit_type").selectedIndex;
+            var projectIdx = document.getElementById("xnat:pVisitData/project").selectedIndex; //even though they're hidden half the time, the select boxes are still there.
+            var subjectIdx = document.getElementById("xnat:pVisitData/subject_id").selectedIndex; //even though they're hidden half the time, the select boxes are still there.
+            if( !bSessionDate ||  !visitNameField || visitTypeIdx == 0 || projectIdx == 0 || subjectIdx == 0){
+                return false;
+            } else {
+                return true;
+            }
+
+        }
+
+        this.showMessage = function (title, message, confirmOnly) {
+            var buttonArray;
+            if (!confirmOnly) {
+                buttonArray = [{ text:'Yes', handler:handleYes, isDefault:true },
+                    { text:'No', handler:handleNo }];
+            } else {
+                buttonArray = [{ text:'OK', handler:handleOK, isDefault:true }];
+            }
+            var dialog = new YAHOO.widget.SimpleDialog("dialog", {
+                width:"20em",
+                close:false,
+                fixedcenter:true,
+                constraintoviewport:true,
+                modal:true,
+                icon:YAHOO.widget.SimpleDialog.ICON_WARN,
+                visible:true,
+                draggable:false,
+                buttons: buttonArray
+            });
+
+            dialog.manager = this;
+            dialog.render(document.getElementById('layout_content'));
+            dialog.setHeader(title);
+            dialog.setBody(message);
+            dialog.bringToTop();
+            dialog.show();
+
+            function handleYes() {
+                this.hide();
+                this.manager.manageLaunchUploaderButton(true);
+            }
+
+            function handleNo() {
+                this.hide();
+                this.manager.manageLaunchUploaderButton(false);
+            }
+
+            function handleOK() {
+                this.hide();
+            }
+        }
+    }
+
+
+    /* Modal definitions and launchers */
+    var visit_open = {
+        width: 500,
+        height: 300,
+        scroll: false,
+        title: 'Create A New Visit',
+        template: '#visit-edit',
+        enter: false,
+        buttons: {
+            ok: {
+                label: 'Open Visit',
+                isDefault: true,
+                close: true,
+                action: function(obj) {
+                    obj.$modal.find('#visit-open-form').submit();
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                close: true,
+                link: true
+            }
+        }
+    };
+
+    var editVisitModal = function(visitID) {
+        visit_open.title = "Edit This Visit";
+        visit_open.beforeShow = function(obj) {
+          // obj.$modal is the instance of the modal and contains its interior contents
+						$.getJSON(XNAT.url.dataUrl('/projects/$project/subjects/$subject.getId()/visits/'+visitID+'?format=json'),
+						function(data){
+							var visitInfo = data.items[0].data_fields;
+
+							var visitDateInput = $("input[id='xnat:pVisitData/date']", obj.$modal);
+							var visitTypeSelect = $("input[id='xnat:pVisitData/visit_type']", obj.$modal);
+							var visitLabelInput = $("input[id='xnat:pVisitData/visit_name']", obj.$modal);
+							var csrf = $("#XNAT_CSRF", obj.$modal);
+
+							$(visitDateInput).val(visitInfo.date);
+							$(visitLabelInput).val(visitInfo.visit_name);
+							$(csrf).val(window.csrfToken);
+							/*
+							$(visitTypeSelect).find('option').each(function(){
+									$(this).remove();
+							});
+							var selectedVisit = '<option value="'+visitInfo.visit_type+'" selected>'+visitInfo.visit_type+'</option>';
+							$(visitTypeSelect).append(selectedVisit);
+							*/
+						});
+        };
+        xmodal.open(visit_open);
+    };
+</script>

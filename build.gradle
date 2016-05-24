@@ -1,0 +1,267 @@
+def pluginVersion = '1.0.0-SNAPSHOT'
+group 'org.nrg.xnat.protocol'
+version pluginVersion
+def vXnat = '1.7.0-SNAPSHOT'
+def vSpring = '4.2.5.RELEASE'
+def vSpringSecurity = '4.0.4.RELEASE'
+def vSwagger = '2.3.1'
+def vJackson = '2.6.5'
+def vJunit = '4.12'
+def vServletApi = '3.1.0'
+def vH2 = '1.4.191'
+def vGroovy = '2.4.6'
+def vLog4j = '1.2.17'
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url 'https://nrgxnat.artifactoryonline.com/nrgxnat/libs-release'
+            name 'XNAT Release Repository'
+        }
+        maven {
+            url 'https://nrgxnat.artifactoryonline.com/nrgxnat/libs-snapshot'
+            name 'XNAT Snapshot Repository'
+        }
+    }
+    dependencies {
+        classpath "org.nrg.xnat.build:xnat-data-builder:1.7.0-SNAPSHOT"
+    }
+    configurations {
+        all*.exclude group: 'avalon-framework'
+        all*.exclude group: 'avalon-logkit'
+        all*.exclude group: 'com.metaparadigm'
+        all*.exclude group: 'com.sun.mail'
+        all*.exclude group: 'excalibur-component'
+        all*.exclude group: 'excalibur-instrument'
+        all*.exclude group: 'excalibur-logger'
+        all*.exclude group: 'excalibur-pool'
+        all*.exclude group: 'fop'
+        all*.exclude group: 'geronimo-spec'
+        all*.exclude group: 'hsqldb'
+        all*.exclude group: 'imagej'
+        all*.exclude group: 'jamon'
+        all*.exclude group: 'jakarta-regexp'
+        all*.exclude group: 'org.apache.geronimo.specs'
+        all*.exclude group: 'velocity'
+        all*.exclude group: 'xmlrpc'
+        all*.exclude group: 'ant', module: 'ant'
+        all*.exclude group: 'commons-email', module: 'commons-email'
+        all*.exclude group: 'edu.ucar', module: 'netcdf'
+        all*.exclude group: 'javax.jms', module: 'jms'
+        all*.exclude group: 'javax.mail', module: 'mail'
+        all*.exclude group: 'javax.servlet', module: 'servlet-api'
+        all*.exclude group: 'javax.sql', module: 'jdbc-stdext'
+        all*.exclude group: 'javax.transaction', module: 'jta'
+        all*.exclude group: 'jdbc', module: 'jdbc'
+        all*.exclude group: 'jms', module: 'jms'
+        all*.exclude group: 'jython', module: 'jython'
+        all*.exclude group: 'org.nrg', module: 'nrg'
+        all*.exclude group: 'net.sf.saxon', module: 'saxon'
+        all*.exclude group: 'stax', module: 'stax-api'
+        all*.exclude group: 'xml-apis', module: 'xml-apis'
+        all*.exclude module: 'commons-beanutils-core'
+        all*.exclude module: 'log4j-slf4j-impl'
+        all*.exclude module: 'pipelineCNDAXNAT'
+        all*.exclude module: 'slf4j-simple'
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url 'https://nrgxnat.artifactoryonline.com/nrgxnat/libs-release'
+        name 'XNAT Release Repository'
+    }
+    maven {
+        url 'https://nrgxnat.artifactoryonline.com/nrgxnat/libs-snapshot'
+        name 'XNAT Snapshot Repository'
+    }
+    maven {
+        url 'https://nrgxnat.artifactoryonline.com/nrgxnat/ext-release'
+        name 'XNAT External Release Repository'
+    }
+    mavenCentral()
+    jcenter()
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+if (hasProperty("rt.17.jar")) {
+    // Solution for bootstrap classpath warning and possible issues with compatibility with 1.7 libraries
+    // was taken from this post on discuss.gradle.org: http://bit.ly/24xD9j0
+    def rt17jar = getProperty("rt.17.jar")
+    logger.info "Using ${rt17jar} as the bootstrap class path jar."
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.fork = true
+            options.compilerArgs << "-XDignore.symbol.file"
+            options.bootClasspath = rt17jar
+        }
+    }
+} else {
+    logger.warn "No value was set for the rt.17.jar build property, using the default bootstrap class path. You should consider setting rt.17.jar to indicate a jar file containing the Java 1.7 run-time library:\n"
+    logger.warn "  ./gradlew -Prt.17.jar=rt-1.7.0_45.jar clean test\n"
+}
+
+configurations {
+    all*.exclude group: 'avalon-framework'
+    all*.exclude group: 'avalon-logkit'
+    all*.exclude group: 'com.metaparadigm'
+    all*.exclude group: 'com.sun.mail'
+    all*.exclude group: 'excalibur-component'
+    all*.exclude group: 'excalibur-instrument'
+    all*.exclude group: 'excalibur-logger'
+    all*.exclude group: 'excalibur-pool'
+    all*.exclude group: 'fop'
+    all*.exclude group: 'geronimo-spec'
+    all*.exclude group: 'hsqldb'
+    all*.exclude group: 'imagej'
+    all*.exclude group: 'jamon'
+    all*.exclude group: 'jakarta-regexp'
+    all*.exclude group: 'org.apache.geronimo.specs'
+    all*.exclude group: 'velocity'
+    all*.exclude group: 'xmlrpc'
+    all*.exclude group: 'ant', module: 'ant'
+    all*.exclude group: 'commons-email', module: 'commons-email'
+    all*.exclude group: 'edu.ucar', module: 'netcdf'
+    all*.exclude group: 'javax.jms', module: 'jms'
+    all*.exclude group: 'javax.mail', module: 'mail'
+    all*.exclude group: 'javax.servlet', module: 'servlet-api'
+    all*.exclude group: 'javax.sql', module: 'jdbc-stdext'
+    all*.exclude group: 'javax.transaction', module: 'jta'
+    all*.exclude group: 'jdbc', module: 'jdbc'
+    all*.exclude group: 'jms', module: 'jms'
+    all*.exclude group: 'jython', module: 'jython'
+    all*.exclude group: 'org.nrg', module: 'nrg'
+    all*.exclude group: 'net.sf.saxon', module: 'saxon'
+    all*.exclude group: 'stax', module: 'stax-api'
+    all*.exclude group: 'xml-apis', module: 'xml-apis'
+    all*.exclude module: 'commons-beanutils-core'
+    all*.exclude module: 'log4j-slf4j-impl'
+    all*.exclude module: 'pipelineCNDAXNAT'
+    all*.exclude module: 'slf4j-simple'
+}
+
+task sourceJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', 'XNAT Visits And Protocols Plugin')
+                root.appendNode('description', '')
+                root.appendNode('url', 'https://bitbucket.org/jcleve01/protocols-plugin')
+                root.appendNode('inceptionYear', '2016')
+
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'https://bitbucket.org/jcleve01/protocols-plugin')
+                scm.appendNode('connection', 'scm:https://jcleve01@bitbucket.org/jcleve01/protocols-plugin.git')
+                scm.appendNode('developerConnection', 'scm:https://jcleve01@bitbucket.org/jcleve01/protocols-plugin.git')
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'Simplified BSD 2-Clause License')
+                license.appendNode('url', 'http://xnat.org/about/license.php')
+                license.appendNode('distribution', 'repo')
+
+                def developers = root.appendNode('developers')
+                def clevelandj = developers.appendNode('developer')
+                clevelandj.appendNode('id', 'clevelandj')
+                clevelandj.appendNode('name', 'Justin Cleveland')
+                clevelandj.appendNode('email', 'clevelandj@wustl.edu')
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
+                // line in the form -PrepoUsername=foo -PrepoPassword=bar.
+                username propertyWithDefault('repoUsername', 'username')
+                password propertyWithDefault('repoPassword', 'password')
+            }
+            if (project.version.endsWith('-SNAPSHOT')) {
+                url "https://nrgxnat.artifactoryonline.com/nrgxnat/libs-snapshot-local"
+            } else {
+                url "https://nrgxnat.artifactoryonline.com/nrgxnat/libs-release-local"
+            }
+        }
+    }
+}
+
+def propertyWithDefault(def String property, def Object value) {
+    hasProperty(property) ? getProperty(property) : value
+}
+
+dependencies {
+    compile("org.nrg.xnat:web:${vXnat}") {
+        exclude group: '*'
+    }
+    compile("org.nrg.xnat:xnat-data-models:${vXnat}") {
+        exclude group: '*'
+    }
+    compile "org.nrg.xdat:tasks:${vXnat}"
+    compile("org.nrg.xdat:core:${vXnat}") {
+        exclude group: '*'
+    }
+    compile("org.nrg:framework:${vXnat}") {
+        exclude group: '*'
+    }
+    
+    compile "org.reflections:reflections:0.9.10"
+    compile "javax.servlet:javax.servlet-api:3.1.0"
+
+    compile(group: 'turbine', name: 'turbine', version: '2.3.3') {
+        exclude group: '*'
+    }
+    compile(group: 'org.apache.velocity', name: 'velocity', version: '1.7') {
+        exclude group: '*'
+    }
+    
+    compile "org.quartz-scheduler:quartz:2.2.2"
+    compile "org.nrg:config:${vXnat}"
+    compile "javax.mail:javax.mail-api:1.5.5"
+    compile "org.springframework:spring-webmvc:${vSpring}"
+    compile "org.springframework:spring-context-support:${vSpring}"
+    compile "org.springframework:spring-context:${vSpring}"
+    compile "org.springframework.security:spring-security-acl:${vSpringSecurity}"
+    compile "org.springframework.security:spring-security-aspects:${vSpringSecurity}"
+    compile "org.springframework.security:spring-security-config:${vSpringSecurity}"
+    compile "org.springframework.security:spring-security-ldap:${vSpringSecurity}"
+    compile "org.springframework.security:spring-security-taglibs:${vSpringSecurity}"
+    compile "io.springfox:springfox-swagger2:${vSwagger}"
+    compile "io.springfox:springfox-swagger-ui:${vSwagger}"
+    compile "org.codehaus.groovy:groovy-all:${vGroovy}"
+    testCompile "junit:junit:${vJunit}"
+    testCompile "org.springframework:spring-test:${vSpring}"
+    testCompile "org.hamcrest:hamcrest-library:1.3"
+    testCompile "javax.servlet:javax.servlet-api:${vServletApi}"
+    testCompile "com.h2database:h2:${vH2}"
+    compile "log4j:log4j:${vLog4j}"
+}

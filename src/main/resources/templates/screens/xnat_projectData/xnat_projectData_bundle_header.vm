@@ -1,0 +1,30 @@
+<h2 style="margin-bottom:0px;">Subject Visit Completion Status</h2>
+
+<script type="text/javascript">
+function addImages(visitId, datatype, subtype){
+  window.location = serverRoot+'/app/action/XDATActionRouter/xdataction/LaunchUploadApplet/pvisit/'+visitId+'/popup/false/project/$project.getId()/subtype/'+subtype;
+};
+
+function addExp(visitId, datatype, subtype){
+  window.location = serverRoot+'/app/action/XDATActionRouter/xdataction/edit/search_element/'+datatype+'/visit/'+visitId+'/popup/false/project/$project.getId()/subtype/'+subtype;
+};
+
+var lastException;
+function showException(exception){
+  if(!lastException || lastException != exception){
+    lastException = exception;
+    alert("Deviation ID: "+exception);
+  }
+};
+
+if(!XNAT.app.tablePageLoadListeners){
+  XNAT.app.tablePageLoadListeners = [];
+}
+XNAT.app.tablePageLoadListeners.push(
+  function(id){
+    if(id && id.indexOf('vp_') >= 0){
+      $('#'+id+'_flt').hide();
+    }
+  }
+);
+</script>

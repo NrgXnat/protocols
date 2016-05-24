@@ -1,0 +1,7 @@
+src/generated/
+src/beans/
+*.iml
+*.log
+/target
+/build
+/.gradle

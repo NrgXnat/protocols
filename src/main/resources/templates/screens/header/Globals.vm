@@ -1,0 +1,9 @@
+<!-- allowGuest: true -->
+
+<script id="protocolHeaderScript">
+#if($protocolsModule)
+	if(!XNAT.app.modules){ XNAT.app.modules = []; }
+	XNAT.app.modules.push( #parse("/screens/ProtocolHeader.vm") );
+#end
+
+</script>

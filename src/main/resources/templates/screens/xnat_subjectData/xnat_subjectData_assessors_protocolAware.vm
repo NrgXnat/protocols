@@ -1,0 +1,60 @@
+<div ng-show="viewExperimentsList">
+	<h4>Experiments</h4>
+	<div class="protocolToolbar">
+		<button class="toolbar" ng-click="viewExperimentsList=false;"><span class="icon icon-sm icon-event"></span> {{labels.visits.viewProtocolSchedule}}</button>
+	</div>
+	<hr class="toolbar">
+	#parse($turbineUtils.getTemplateName("_assessors","xnat:subjectData",$project))
+</div>
+<div ng-hide="viewExperimentsList">
+	<h4 title="{{protocol.name}}">Protocol Schedule</h4>
+	<div class="protocolToolbar">
+##if ($nextVisits > 0 && $user.canEdit("xnat:pVisitData/project", $project) && ($SubjectVisitInfo.getProtocol().getAllowMultipleOpenVisits() || !$SubjectVisitInfo.getHasOpenVisit()))
+
+##set ($visitlink = $link.setAction("CreateExperiment").addPathInfo("data_type","xnat:pVisitData").addPathInfo("subject_id","$subject.getId()").addPathInfo("project","$project").toString())
+
+			<button class="toolbar" ng-click="createNewAdHocVisit()" ng-show="protocol.allowUnexpectedAdHocVisits"><span class="icon icon-sm icon-ad-hoc-event"></span> {{labels.visits.createAdHocVisit}}</button>
+			<button class="toolbar" ng-click="createTerminalVisit()" ng-hide="protocol.allowUnexpectedAdHocVisits"><span class="icon icon-sm icon-event-remove"></span> {{labels.visits.createTerminalVisit}}</button>
+			<button class="toolbar" ng-click="reassignArm()" ng-show="protocol.arms.length"><span class="icon icon-sm icon-reassign"></span> {{labels.visits.reassignArm}}</button>
+			<button class="toolbar" ng-click="viewExperimentsList=true"><span class="icon icon-sm icon-view-list"></span> {{labels.visits.viewAsExperimentList}}</button>
+
+##end
+	</div>
+	<hr class="toolbar">
+	<div id="view_all_link" style="display:none">
+			<a id="toggle_expts_link" style="text-decoration:underline;" onclick="XNAT.app.subject.toggleExptView();">View All Experiments</a>
+	</div>
+	<div id="expt_shared_legend" style="display:none">
+			<div id="" style="display:inline;background-color:#FFCC99;" class="withThinBorder">&nbsp;&nbsp;</div>
+			:Shared
+	</div>
+
+	<div id="expt_denied_legend" style="display:none">
+			<div style="display:inline;background-color:#FF9999;" class="withThinBorder">&nbsp;&nbsp;</div>
+			:Access Denied
+	</div>
+
+	#if ($!SubjectVisitInfo.getUnsortedExperiments().size() > 0)
+			<div class="assessorsWrapper" id="unsorted_experiments">
+					<h4>Unsorted Experiments</h4>
+					<p class="visitHelp">These experiments are associated with this subject, but have not been associated with a visit. If you have a strict protocol in place, you must open a visit that expects this type of experiment before you can move it into that visit.</p>
+					<table class="assessorTable xnat-table">
+							<thead>
+									<tr>
+											<th class="assessorHeaderDate">Date</th>
+											<th class="assessorHeaderName">Experiment</th>
+											<th class="assessorHeaderLabel">Label</th>
+											<th class="assessorHeaderSubtype">Subtype</th>
+											<th class="assessorHeaderActions">Move to Visit</th>
+									</tr>
+							</thead>
+							<tbody>
+									#set ($showAction=true)
+									#foreach ($unsortedExperiment in $SubjectVisitInfo.getUnsortedExperiments())
+											#parse($turbineUtils.getTemplateName("_unsortedExperiment","xnat:subjectData",$project))
+									#end
+							</tbody>
+					</table>
+			</div> <!-- assessors wrapper -->
+	#end
+

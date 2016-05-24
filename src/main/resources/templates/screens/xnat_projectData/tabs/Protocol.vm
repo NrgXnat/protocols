@@ -1,0 +1,259 @@
+#if ($user.isOwner($om.getProject()) || $user.isSiteAdmin())
+<div id="projectApp" ng-app="projectProtocol">
+	<div id="projectController" ng-controller="ProjectProtocolController" class="ng-cloak">
+		<div>
+			<table style="width:500px;"><tbody>
+				<tr>
+					<td>
+						<label for="protocol" id="protocolLabel" class="protocol-label"><span ng-bind="labels.project.selectProtocol"></span></label>
+					</td>
+					<td>
+						<label for="version" id="protocolRevisionLabel" class="protocol-label"><span ng-bind="labels.project.version"></span></label>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<select id="protocol" name="protocol" style="width: 350px;"></select>
+					</td>
+					<td>
+						<select id="version" disabled="disabled" style="min-width: 60px;"></select>
+						<span id="protocolAssignment"></span>
+					</td>
+				</tr>
+				<tr id="versionDescription" style="display:none;">
+					<td colspan="2">
+						<label for="protocolVersionDescription" id="protocolVersionLabel" class="protocolLabel">&nbsp;&nbsp;<span ng-bind="labels.project.versionDescription"></span>: </label>
+						<span id="protocolVersionDescription"></span>
+					</td>
+				</tr>
+			</tbody></table>
+		</div>
+		<br>
+		<button class="toolbar" id="associateProtocolBtn" onclick="associateProtocol();" disabled="disabled" style="float: left;"><span class="icon icon-sm icon-edit-gray"></span> <span ng-bind="labels.project.setProtocol"></span></button>
+		<br>
+		<div id="notificationOptions" ng-show="debug">
+			
+			<br>
+			<hr class="toolbar">
+			<button class="toolbar" id="sendVisitReportNotificiation" class="toolbar" ng-click="sendVisitReportNotificiation();" ng-show="debug"><span class="icon icon-sm icon-list"></span> <span ng-bind="labels.project.sendVisitReportNotificiation"></span></button>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+var protocol;
+var version;
+var protocols;
+var selectedProtocol;
+var protocolWrapper = null;
+$(document).ready(function(){
+  protocol = $('#protocol');
+  version = $('#version');
+  initializeExistingProtocols();
+  protocol.change(function(event){
+    removeAppendImage('protocolAssignment');
+		$('#associateProtocolBtn').removeAttr('disabled');
+    selectProtocol(protocol.val());
+  });
+  version.change(function(event){
+		removeAppendImage('protocolAssignment');
+    $('#associateProtocolBtn').removeAttr('disabled');
+    selectProtocol(protocol.val(), parseInt(version.val()));
+  });
+});
+
+function resetProtocolFields(){
+  $('#protocolVersionDescription').text("");
+  $('#version').attr('disabled', 'disabled').empty();
+};
+
+function initializeExistingProtocols() {
+  var getExistingProtocolsUrl = '$content.getURI('')/data/protocol?'+noCache();
+  try{
+    YAHOO.util.Connect.asyncRequest('GET', getExistingProtocolsUrl, {
+      success:function (o) {
+        try {
+          protocols = JSON.parse(o.responseText);
+          populateExistingProtocols(protocols);
+          selectProtocol();
+        } catch (e) {
+          xModalMessage('ERROR: '+o.status, 'Failed to load protocols.<br/><br/>'+e.message);
+        }
+      },
+      failure:function (o) {
+        handleProtocolError(o);
+      }
+    });
+  } catch (e) {
+    xModalMessage('ERROR: Failed to load protocols.', e.message);
+  }
+};
+
+function populateExistingProtocols(protocols){
+  var epList = protocol.empty();
+  epList.append('<option value="" selected="selected">[No Protocol Selected]</option>');
+  for(var i=0; i<protocols.length; i++){
+    epList.append('<option value="'+protocols[i].protocolId+'">'+protocols[i].name+'</option>');
+  }
+};
+
+function selectProtocol(protocolId, version){
+  var getProtocolUrl = '$content.getURI('')/data/';
+  if(protocolId){
+    getProtocolUrl += 'protocol/'+protocolId+'?XNAT_CSRF='+window.csrfToken+'&'+noCache();
+    if(version){
+      getProtocolUrl += '&version='+version;
+    }
+  } else if(protocolId == ''){
+    getProtocolUrl = null;
+    resetProtocolFields();
+  } else {
+    getProtocolUrl += 'projects/$om.getProject()/protocol?XNAT_CSRF='+window.csrfToken+'&'+noCache();
+  }
+  if(getProtocolUrl) {
+    try{
+      YAHOO.util.Connect.asyncRequest('GET', getProtocolUrl, {
+        success:function (o) {
+          try {
+            protocolWrapper = JSON.parse(o.responseText);
+            selectedProtocol = protocolWrapper.protocol;
+            if(selectedProtocol.protocolId){
+              protocol.val(selectedProtocol.protocolId);
+              if(!protocol.val()){
+                resetProtocolFields();
+              } else {
+                populateRevisions();
+              }
+            }
+          } catch (e) {
+            xModalMessage('ERROR: '+o.status, 'Failed to parse protocol.<br/><br/>'+e.message);
+          }
+        },
+        failure:function (o) {
+          // This is not an error. There simply is no protocol associated. Do nothing...
+          if(version){ // ...was specified though, display an error because this means the server couldn't actually find this version of the protocol to associate
+            xModalMessage('ERROR: Failed to load the selected version of this protocol.', o.responseText);
+          }
+        }
+      });
+    } catch (e) {
+      xModalMessage('ERROR: Failed to load protocol.', e.message);
+    }
+  }
+};
+
+function associateProtocol(){
+  var protocolId = protocol.val();
+  var revision = parseInt(version.val());
+  if(revision){
+    revision = '&version='+revision;
+  } else {
+    revision = '';
+  }
+  if(protocolId) {
+    var associateProtocolUrl = '$content.getURI('')/data/projects/$om.getProject()/protocol/'+protocolId+'?XNAT_CSRF='+window.csrfToken+revision;
+    try{
+      YAHOO.util.Connect.asyncRequest('PUT', associateProtocolUrl, {
+        success:function (o) {
+          try {
+            protocolWrapper = JSON.parse(o.responseText);
+            selectedProtocol = protocolWrapper.protocol;
+            if(selectedProtocol.protocolId){
+              protocol.val(selectedProtocol.protocolId);
+              populateRevisions();
+              appendImage('protocolAssignment', "/images/checkmarkGreen.gif");
+              $('#associateProtocolBtn').attr('disabled', 'disabled');
+            }
+          } catch (e) {
+            xModalMessage('ERROR: '+o.status, 'Failed to associate protocol.<br/><br/>'+e.message);
+            appendImage('protocolAssignment', "/images/checkmarkRed.gif");
+          }
+        },
+        failure:function (o) {
+          handleProtocolError(o);
+          appendImage('protocolAssignment', "/images/checkmarkRed.gif");
+        }
+      });
+    } catch (e) {
+      xModalMessage('ERROR: Failed to associate protocol.', e.message);
+      appendImage('protocolAssignment', "/images/checkmarkRed.gif");
+    }
+  } else {
+    deleteProtocolAssociation();
+  }
+};
+
+function populateRevisions(){
+  var versionDescription = $('#protocolVersionDescription');
+  if(protocolWrapper){
+    if(protocolWrapper.protocol.versionDescription){
+      versionDescription.html(protocolWrapper.protocol.versionDescription);
+    } else {
+      versionDescription.html('');
+    }
+    if(protocolWrapper.maxVersion){
+      version.removeAttr('disabled');
+      version.empty();
+      for(var i=protocolWrapper.maxVersion; i>0; i--){
+        version.append('<option value="'+i+'">'+i+'</option>');
+      }
+    } else {
+      version.attr('disabled', 'disabled');
+    }
+    version.val(protocolWrapper.protocol.version);
+  } else {
+    version.empty();
+    versionDescription.text('');
+    version.attr('disabled', 'disabled');
+  }
+};
+
+function deleteProtocolAssociation(){
+  var deleteProtocolAssociationUrl = '$content.getURI('')/data/projects/$om.getProject()/protocol?XNAT_CSRF='+window.csrfToken;
+  try{
+    YAHOO.util.Connect.asyncRequest('DELETE', deleteProtocolAssociationUrl, {
+      success:function (o) {
+        selectedProtocol = null;
+        protocolWrapper = null;
+        populateRevisions();
+        appendImage('protocolAssignment', "/images/checkmarkGreen.gif");
+        $('#associateProtocolBtn').attr('disabled', 'disabled');
+      },
+      failure:function (o) {
+        handleProtocolError(o);
+        appendImage('protocolAssignment', "/images/checkmarkRed.gif");
+      }
+    });
+  } catch (e) {
+    xModalMessage('ERROR: Failed to dissociate protocol.', e.message);
+    appendImage('protocolAssignment', "/images/checkmarkRed.gif");
+  }
+};
+
+function noCache() {
+ return 'rnd='+new Date().getTime();
+};
+function handleProtocolError(err) {
+  if(err){
+    xModalMessage('ERROR: '+err.status, 'Protocol operation failed.<br/><br/>'+err.statusText+'<br/><br/>'+err.responseText);
+  } else {
+    xModalMessage('ERROR', 'Protocol operation failed.');
+  }
+};
+</script>
+#else
+You are not authorized to manage the protocol association for this project.
+#end
+
+<link rel='stylesheet' href='$content.getURI("style/protocols.css")' />
+
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script -->
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.js"></script>
+<script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
+<script src="$content.getURI('')/scripts/protocols/common.js"></script>
+<script src="$content.getURI('')/scripts/protocols/project.js"></script>
+<script src="$content.getURI('')/scripts/protocols/services.js"></script>
+<script src="$content.getURI('')/scripts/protocols/directives.js"></script>
+<script src="$content.getURI('')/scripts/protocols/i18n/angular-locale_en-US.js"></script>

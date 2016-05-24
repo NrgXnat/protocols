@@ -1,0 +1,22 @@
+<!-- Title: Tools -->
+<!-- Sequence: 50 -->
+<!-- allowGuest: true -->
+
+<li><a href="#tools">Tools</a>
+    <ul>
+        #addGlobalCustomScreens("topBar/Tools")
+
+        #set ($canManageProtocols = $data.getSession().getAttribute("user").isSiteAdmin())
+        #if (!$canManageProtocols)
+            #foreach($authority in $data.getSession().getAttribute("user").getAuthorities())
+                #if ($authority.getAuthority().endsWith("_owner"))
+                    #set ($canManageProtocols = true)
+                #end
+            #end
+        #end
+        #if ($canManageProtocols)
+            <li><a href="$content.getURI("app/template/ManageProtocol.vm")">Manage Protocols</a></li>
+        #end
+
+    </ul>
+</li>

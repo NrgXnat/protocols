@@ -1,0 +1,606 @@
+#* @vtlvariable name="siteConfig" type="java.util.Properties" *#
+#* @vtlvariable name="data" type="org.apache.turbine.util.RunData" *#
+#* @vtlvariable name="turbineUtils" type="org.nrg.xdat.turbine.utils.TurbineUtils" *#
+#* @vtlvariable name="content" type="org.apache.turbine.services.pull.tools.ContentTool" *#
+#set($showUserList = !$turbineUtils.toBoolean($siteConfig.getProperty("restrictUserListAccessToAdmins", "true")) || $data.getSession().getAttribute("user").checkRole("Administrator"))
+<link rel='stylesheet' href='$content.getURI("style/protocols.css")' />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script -->
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.js"></script>
+<script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
+<script src="$content.getURI('')/scripts/protocols/common.js"></script>
+<script src="$content.getURI('')/scripts/protocols/edit.js"></script>
+<script src="$content.getURI('')/scripts/protocols/services.js"></script>
+<script src="$content.getURI('')/scripts/protocols/directives.js"></script>
+<script src="$content.getURI('')/scripts/protocols/i18n/angular-locale_en-US.js"></script>
+
+<div ng-app="editProtocol" id="editProtocolDiv" class="manageProtocols">
+  <div id="protocolWizard" ng-controller="EditProtocolController">
+    <div class="title" style="width: 900px; float: left;">{{labels.title.editProtocols}}: <span id="protocolNameTitle">{{protocol.name}}</span></div>
+	<div style="width:100%; height: 0px; clear:both;"></div>
+	<div class="protocolToolbar">
+	  <button id="editProtocolSettingsButton" class="toolbar" ng-click="editProtocolSettings()"><span class="icon icon-sm icon-status icon-settings"></span>{{labels.protocolEditSettings}}</button>
+	  <button id="editProtocolUsersButton" class="toolbar" ng-click="editProtocolUsers()"><span class="icon icon-sm icon-status icon-subject"></span>{{labels.protocolEditUsers}}</button>
+	  <button id="viewProtocolProjectsButton" class="toolbar" ng-click="viewProtocolProjects()"><span class="icon icon-sm icon-status icon-view"></span>{{labels.protocolViewProjects}}</button>
+	  <button id="editProtocolNotificationsButton" class="toolbar" ng-click="editProtocolNotifications()"><span class="icon icon-sm icon-status icon-email"></span>{{labels.protocolNotifications}}</button>
+    <div class="version-label" ng-show="protocol.version" ng-mouseover="selectVersion = true" ng-mouseout="selectVersion = false">VERSION <span class="protocol-version" ng-hide="selectVersion">{{protocol.version}}</span>
+		<span class="select-version" ng-show="selectVersion" ><select id="protocolVersionDropdown" ng-model="currentVersion" ng-options="revision for revision in revisions" ng-change="selectRevision()"></select></span>
+	</div>
+  <hr class="toolbar">
+	<div style="width:100%; height: 0px; clear:both;"></div>
+	<div id="protocolDefinition">
+		<div id="protocolOptions" class="protocol-options">
+			<div class="protocol-options-header">
+				<div class="protocol-options-title">{{labels.protocolOptionsTitle}}</div>
+				<div class="protocol-options-collapse" ng-click="expandCollapseProtocolOptions()"><span class="icon icon-sm icon-status icon-caret-up" ng-show="display.protocolOptions" style="top: 3px; position: relative;"></span><span class="icon icon-sm icon-status icon-caret-down" ng-hide="display.protocolOptions"></span>{{labels.protocolOptionsDisplay}}</div>
+			</div>
+			<div style="width:100%; height: 0px; clear:both;"></div>
+			<ng-include src="protocolOptionsContent"></ng-include>
+		</div>
+		<br>
+		<div ng-hide="visitTypeExperimentContent">
+			<button id="firstVisitButton" ng-click="addVisit($event)" class="first-visit">{{labels.addFirstVisit}}&nbsp;&#x25B6;</button>
+			<br><br>
+			<div ng-class="addNewVisitBubble" class="add-new-help-bubble hidden-bubble withfade" ng-bind-html="labels.addNewVisitBubble"></div>
+		</div>
+		<div id="protocolExperiments">
+			<div id="visitExperimentTable">
+				<ng-include src="visitTypeExperimentContent"></ng-include>
+			</div>
+		</div>
+	</div>
+	<br/>
+	<div style="float: right;">
+		<a id="exportFiles" href="#"></a>
+		<button ng-click="printToConsole()">Print to Console</button>
+		<button id="deleteProtocolButton" ng-click="deleteProtocol()" ng-hide="newProtocol">{{labels.deleteProtocol}}</button>
+		<button id="exportProtocolButton" ng-click="exportProtocol()" ng-hide="newProtocol">{{labels.exportProtocol}}</button>
+		<button id="updateProtocolButton" ng-click="updateProtocol()">{{labels.updateProtocol.action}}</button>
+	</div>
+</div>
+
+<script type="text/ng-template" id="template.dialog.missingUsers">
+	<div class="dialogHeader">{{dialog.missingUsers.labels.header}}</div>
+	<br>
+	<div style="color:#AA0000;">
+		<ul>
+			<li ng-repeat="missingUser in missingUsers">{{missingUser}}</li>
+		</ul>
+	</div>
+</script>
+
+<script type="text/ng-template" id="template.protocolOptions">
+	<div class="protocol-options-content" ng-show="display.protocolOptions">
+		<switchArray>
+			<li id="allowUnexpectedExperiments">
+				<div class="btn-group switch-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="protocol.allowUnexpectedExperiments" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="protocol.allowUnexpectedExperiments" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.allowUnexpectedExperiments}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+			<li id="allowUnexpectedAdHocVisits">
+				<div class="btn-group switch-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="protocol.allowUnexpectedAdHocVisits" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="protocol.allowUnexpectedAdHocVisits" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.allowUnexpectedAdHocVisits}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+			<li id="allowMultipleOpenVisits">
+				<div class="btn-group switch-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="protocol.allowMultipleOpenVisits" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="protocol.allowMultipleOpenVisits" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.allowMultipleOpenVisits}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+			<li id="allowExceptions">
+				<div class="btn-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="protocol.allowExceptions" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="protocol.allowExceptions" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.allowExceptions}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+			<li id="enableNonVisitDataCollection" ng-show="nonVisitDataCollectionSupport">
+				<div class="btn-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="protocol.enableNonVisitDataCollection" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="protocol.enableNonVisitDataCollection" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.enableNonVisitDataCollection}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+			<li id="enableMultipleArms" ng-show="armSupport">
+				<div class="btn-group">
+					<label class="btn btn-primary switch switch-yes" ng-model="enableMultipleArms" ng-click="initializeMultiArmProtocol()" btn-radio="true">Yes</label>
+					<label class="btn btn-primary switch switch-no" ng-model="enableMultipleArms" ng-click="initializeSingleArmProtocol()" btn-radio="false">No</label>
+				</div>
+				<div>
+					<label class="switch-content">{{labels.protocolOptions.enableMultipleArms}}</label>&nbsp;
+					<span class="infolink icon icon-sm icon-status icon-qm" ng-click="showHelpLink($event)"/>
+				</div>
+			</li>
+		</switchArray>
+		<div style="width:100%; height: 5px; clear:both;"></div>
+		<button ng-click="resetDefaultSettings($event)">{{labels.resetDefaults}}</button>
+	</div>
+</script>
+
+<script type="text/ng-template" id="template.visitTypeExperimentTable">
+	<div ng-class="addNewExperimentsBubble" class="add-new-help-bubble hidden-bubble withfade" style="margin-top:-73px;" ng-bind-html="labels.addNewExperimentsBubble"></div>
+	<table class="vtex"><tbody>
+		<tr class="vtex-header-row">
+			<th class="vtex-exp-column vtex-corner-cell">
+				<button id="addExperiment" class="add-experiment" ng-click="addExperiment()">&#x25BC;&nbsp;{{labels.add}} {{labels.experiment}}</button>&nbsp;&nbsp;&nbsp;
+				<button id="addVisit" class="add-visit" ng-click="addVisit($event)">{{labels.add}} {{labels.visit}}&nbsp;&#x25B6;</button>
+			</th>
+			<th class="vtex-visit-row-header" ng-repeat="visitType in protocol.visitTypes">
+				<div class="vtex-visit-col-header">
+					<div id="{{visitType.name}}_visit" class="vtex-visit-name">{{visitType.name}}</div>
+					<div id="{{visitType.name}}_description" class="vtex-visit-description">{{visitType.description}}</div>
+				</div>
+				<div class="vtex-visit-modification-buttons" ng-hide="modalHideHack">
+					<span id="edit_{{visitType.name}}" class="icon icon-sm icon-status icon-edit" ng-click="editVisitType($index)"></span>
+					<span id="delete_{{visitType.name}}" class="icon icon-sm icon-status icon-trash-red" ng-click="deleteVisit($index)"></span>
+				</div>
+			</th>
+		</tr>
+		<tr class="vtex-header-row add-all-experiments">
+			<td class="vtex-experiment-row-header select-all-heading">{{labels.addAllExperimentsRow}}</td>
+			<td class="select-all-cell" ng-repeat="visitType in protocol.visitTypes">
+				<input id="c{{$index}}" type="checkbox" ng-click="addAllExpsToVisit($event, this)" ng-checked="areAllExperimentsChecked(this)"/>
+			</td>
+		</tr>
+		<tr class="vtex-experiment-row" ng-repeat="experiment in experimentList">
+		  <td class="vtex-experiment-row-header">
+				<div class="vtex-experiment-info">
+					<div class="vtex-experiment-type" ng-class="experiment.missing"><span id="{{dataTypeOptions[experiment.type]}}{{dataTypeOptions[experiment.parentExperiment.type]}}_{{experiment.subtype}}{{experiment.parentExperiment.subtype}}-{{assessorTypeOptions[experiment.type]}}" ng-show="experiment.missing && !experiment.parentExperiment">{{experiment.type}}</span>{{dataTypeOptions[experiment.type]}}<span ng-show="experiment.parentExperiment">&nbsp;&nbsp;-&nbsp;&nbsp;<span id="{{dataTypeOptions[experiment.type]}}{{dataTypeOptions[experiment.parentExperiment.type]}}_{{experiment.subtype}}{{experiment.parentExperiment.subtype}}-{{assessorTypeOptions[experiment.type]}}_missing" ng-show="experiment.missing">{{experiment.type}}</span>{{assessorTypeOptions[experiment.type]}}</span></div>
+					<div class="vtex-experiment-subtype" ng-show="experiment.subtype"><label>{{labels.subtype}}:&nbsp;</label>{{experiment.subtype}}</div>
+				</div>
+				<div style="height:5px;" ng-show="experiment.subtype"></div>
+				<div class="vtex-experiment-modification-buttons">
+					<span id="edit_{{dataTypeOptions[experiment.type]}}_{{experiment.subtype}}" class="icon icon-sm icon-status icon-edit" ng-click="editExperiment(experiment)" ng-hide="experiment.parentExperiment || experiment.missing"></span>
+					<span id="delete_{{dataTypeOptions[experiment.type]}}{{dataTypeOptions[experiment.parentExperiment.type]}}_{{experiment.subtype}}{{experiment.parentExperiment.subtype}}-{{assessorTypeOptions[experiment.type]}}" class="icon icon-sm icon-status icon-trash-red" ng-click="deleteExperiment(experiment)"></span>
+				</div>
+			</td>
+			<td ng-repeat="visitType in protocol.visitTypes">
+				<input id="c{{$parent.$index + 1}}_{{$index + 1}}" type="checkbox" ng-click="mapExpToVisit($event, this)" ng-checked="isExpVisitChecked(this)"/>
+			</td>
+		</tr>
+		<tr class="vtex-footer-row">
+			<td class="vtex-experiment-row-header vtex-footer">{{labels.tableFooterHeading}}</td>
+			<td id="{{visitType.name}}_offsets" class="vtex-footer-summary" ng-repeat="visitType in protocol.visitTypes">			{{labels.tableFooterOffset}}:&nbsp;{{visitType.delta}}<br>{{labels.tableFooterWindow}}:&nbsp;-{{visitType.deltaLow}}/+{{visitType.deltaHigh}}
+			</td>
+		</tr>
+	</tbody></table>
+</script>
+
+<script type="text/ng-template" id="template.multiArmVisitTypeExpirimentTable">
+	<tabset>
+		<tab select="selectDefaultArm()">
+			<tab-heading>
+				<i class="glyphicon glyphicon-certificate"></i>&nbsp;Default Arm
+			</tab-heading>
+			<ng-include src="armTabContent[0]"></ng-include>
+		</tab>
+		<tab ng-repeat="arm in protocol.arms" heading="Arm {{arm.armOrder}}: {{arm.name}}" active="arm.active" disabled="arm.disabled">
+			<div ng-include="armTabContent[arm.armOrder]"></div>
+		</tab>
+		<tab select="addArm()">
+			<tab-heading>
+				<i class="glyphicon glyphicon-plus-sign"></i>&nbsp;New Arm
+			</tab-heading>
+			<ng-include src="armTabContent[0]"></ng-include>
+		</tab>
+	</tabset>
+</script>
+
+<script type="text/ng-template" id="template.help">
+	<span class="help-header"><span ng-bind="labels.help"></span> &gt;&gt; </span><span class="dialogHeader" ng-bind="helpInfo.labels.title"></span>
+	<br><br>
+	<div class="help-contents" ng-bind-html="helpInfo.labels.content"></div>
+</script>
+
+<script type="text/ng-template" id="template.dialog.savedProtocol">
+	<b>{{protocol.name}} {{dialog.savedProtocol.labels.header}}</b>
+</script>
+
+<script type="text/ng-template" id="template.dialog.editProtocolUsers">
+	<div class="dialogHeader">{{dialog.editProtocolUsers.labels.header}}</div>
+	<br>
+	<div ng-bind-html="dialog.editProtocolUsers.labels.directions"></div>
+	<br>
+	<div style="width: 49%; float: left;">
+		<label class="protocol-label">{{dialog.editProtocolUsers.labels.protocolOwners}}</label>
+		<div id="protocolOwnerList" class="user-selection">
+			<div ng-repeat="user in cachedUserWhiteList">
+				<input id="addedUser_{{user.login}}" type="checkbox" ng-click="selectUser($event, this)" ng-checked="user.checked">
+				<span>{{user.login}}</span>
+			</div>
+		</div>
+		<button ng-click="removeUser($event)" style="margin-top:3px;">{{dialog.editProtocolUsers.labels.removeUser}}&nbsp;&gt;&gt;</button>
+		<button id="selectAllOwners" ng-click="selectAllUsers($event)" style="margin-top:3px;">{{dialog.editProtocolUsers.labels.selectAllOwners}}</button>
+	</div>
+	<div style="width: 49%; float: right;" ng-hide="userListAccessDenied">
+		<label class="protocol-label">{{dialog.editProtocolUsers.labels.availableUsers}}</label>
+		<div id="availableUserList" class="user-selection">
+			<div ng-repeat="user in usersNotAlreadyOwners">
+				<input id="unaddedUser_{{user.login}}" type="checkbox" ng-click="selectUser($event, this)" ng-checked="user.checked">
+				<span>{{user.login}}</span>
+			</div>
+		</div>
+		<button id="addProtocolUserButton" ng-click="addUser($event)" style="margin-top:3px;">&lt;&lt;&nbsp;{{dialog.editProtocolUsers.labels.addUser}}</button>
+		<button id="selectAllUsers" ng-click="selectAllUsers($event)" style="margin-top:3px;">{{dialog.editProtocolUsers.labels.selectAllUsers}}</button>
+	</div>
+    <div style="width: 49%; float: right;" ng-show="userListAccessDenied" ng-bind="dialog.editProtocolUsers.labels.userListAccessDeniedWarning">
+    </div>
+</script>
+
+<script type="text/ng-template" id="template.dialog.viewProtocolProjects">
+	<div class="dialogHeader">{{dialog.viewProtocolProjects.labels.header}}</div>
+	<br>
+	<div ng-bind-html="dialog.viewProtocolProjects.labels.directions"></div>
+	<br>
+	<div>
+		<div style="overflow-y:scroll; max-height:134px;">
+			<table class="projectSelection"><tbody>
+				<tr>
+					<th class="selectAllProjects"><input type="checkbox" ng-click="checkAllProjects($event, projectsUsing)"></th>
+					<th style="width: 290px;">{{dialog.viewProtocolProjects.labels.projectHeader}}</th>
+					<th style="width: 120px;">{{dialog.viewProtocolProjects.labels.versionHeader}}</th>
+					<th style="width: 124px;">{{dialog.viewProtocolProjects.labels.modifiedHeader}}</th>
+				</tr>
+				<tr ng-repeat="project in projectsUsing">
+					<td><input id="{{project.projectId}}_applied" type="checkbox" ng-click="selectProject($event, this)" ng-checked="project.checked"></td>
+					<td><a id="{{project.projectId}}_added" href="{{projectLink}}/{{project.projectId}}" target="_blank" ng-bind-html="project.projectName"></a></td>
+					<td id="{{project.projectId}}_version">{{project.protocolVersion}}</td>
+					<td style="font-size: 8pt;">{{project.timestamp | date:'MM/dd/yyyy @ h:mma'}}</td>
+				</tr>			
+			<tbody></table>
+		</div>
+		<br>
+		<div ng-hide="projectsUsing.length" style="color:#ff0000;">{{dialog.viewProtocolProjects.labels.noAssociatedProjects}}<br><br></div>
+		<div class="error" ng-show="selectProjectToRemove">{{dialog.viewProtocolProjects.labels.selectProjectToRemove}}</div>
+		<button id="updateProjectVersionButton" ng-click="updateProtocolVersion($event)" style="margin-top:3px;">{{dialog.viewProtocolProjects.labels.updateProtocolVersionButton}}</button>
+		<button id="applyProtocolProjectButton" ng-click="applyProtocolToProjects($event)" style="margin-top:3px;">{{dialog.viewProtocolProjects.labels.applyProtocolToProjectsButton}}</button>
+		<button id="removeProtocolProjectButton" ng-click="removeProtocolFromProjects($event)" style="margin-top:3px;">{{dialog.viewProtocolProjects.labels.removeProtocolFromProjectsButton}}</button>
+	</div>
+</script>
+
+<script type="text/ng-template" id="template.dialog.selectProjects">
+	<div ng-bind-html="dialog.selectProjects.labels.directions"></div>
+	<br>
+	<div>
+		<table class="projectSelection"><tbody>
+			<tr>
+				<th class="selectAllProjects"><input type="checkbox" ng-click="checkAllProjects($event, unassociatedProjects)"></th>
+				<th style="width: 290px;">{{dialog.selectProjects.labels.projectHeader}}</th>
+			</tr>
+			<tr ng-repeat="project in unassociatedProjects">
+				<td><input id="apply_{{project.name}}" type="checkbox" ng-click="selectProject($event, this)" ng-checked="project.checked"></td>
+				<td ng-bind-html="project.name"></td>
+			</tr>			
+		<tbody></table>
+	</div>
+</script>
+
+<script type="text/ng-template" id="template.dialog.confirm.unassociateProjects">
+	<div class="dialogHeader">{{dialog.confirm.unassociateProjects.labels.question}}</div>
+	<br>
+	<div ng-bind-html="dialog.confirm.unassociateProjects.labels.directions"></div>
+	<br>
+	<ul>
+		<li ng-repeat="project in projectsToRemove">
+			<span>{{project}}</span>
+		</li>
+	</ul>
+</script>
+
+<script type="text/ng-template" id="template.dialog.editProtocolNotifications">
+	<div class="dialogHeader">{{dialog.editProtocolNotifications.labels.header}}</div>
+	<br>
+	<div ng-bind-html="dialog.editProtocolNotifications.labels.directions"></div>
+	<br>
+	<div>
+		<switchArray>
+		<table class="notificationSelection"><tbody>
+			<tr>
+				<th style="width: 420px;">{{dialog.editProtocolNotifications.labels.protocolEvent}}</th>
+				<!-- th style="width: 140px;">{{dialog.editProtocolNotifications.labels.notifyInHeader}}</th -->
+				<th style="width: 140px;">{{dialog.editProtocolNotifications.labels.notifyInEmail}}</th>
+			</tr>
+			<tr>
+				<td>{{dialog.editProtocolNotifications.labels.visitApproachingWindow}}</td>
+				<!-- td class="btn-group switch-group">
+					<label id="visitApproaching_headerNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.headerNotifications.visitApproachingWindow" btn-radio="true">Yes</label>
+					<label id="visitApproaching_headerNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.headerNotifications.visitApproachingWindow" btn-radio="false">No</label>
+				</td -->
+				<td class="btn-group switch-group">
+					<label id="visitApproaching_emailNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.emailNotifications.visitApproachingWindow" btn-radio="true">Yes</label>
+					<label id="visitApproaching_emailNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.emailNotifications.visitApproachingWindow" btn-radio="false">No</label>
+				</td>
+			</tr>
+			<!-- tr>
+				<td>{{dialog.editProtocolNotifications.labels.visitInWindowNotOpen}}</td>
+				<td class="btn-group switch-group">
+					<label id="visitNotOpen_headerNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.headerNotifications.visitInWindowNotOpen" btn-radio="true">Yes</label>
+					<label id="visitNotOpen_headerNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.headerNotifications.visitInWindowNotOpen" btn-radio="false">No</label>
+				</td>
+				<td class="btn-group switch-group">
+					<label id="visitNotOpen_emailNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.emailNotifications.visitInWindowNotOpen" btn-radio="true">Yes</label>
+					<label id="visitNotOpen_emailNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.emailNotifications.visitInWindowNotOpen" btn-radio="false">No</label>
+				</td>
+			</tr -->	
+			<tr>
+				<td>{{dialog.editProtocolNotifications.labels.overdueMissedVisit}}</td>
+				<!-- td class="btn-group switch-group">
+					<label id="visitOverdue_headerNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.headerNotifications.overdueMissedVisit" btn-radio="true">Yes</label>
+					<label id="visitOverdue_headerNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.headerNotifications.overdueMissedVisit" btn-radio="false">No</label>
+				</td -->
+				<td class="btn-group switch-group">
+					<label id="visitOverdue_emailNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.emailNotifications.overdueMissedVisit" btn-radio="true">Yes</label>
+					<label id="visitOverdue_emailNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.emailNotifications.overdueMissedVisit" btn-radio="false">No</label>
+				</td>
+			</tr>	
+			<!-- tr>
+				<td>{{dialog.editProtocolNotifications.labels.deviationEntered}}</td>
+				<td class="btn-group switch-group">
+					<label id="deviationEntered_headerNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.headerNotifications.deviationEntered" btn-radio="true">Yes</label>
+					<label id="deviationEntered_headerNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.headerNotifications.deviationEntered" btn-radio="false">No</label>
+				</td>
+				<td class="btn-group switch-group">
+					<label id="deviationEntered_emailNotification_yes" class="btn btn-primary switch switch-yes" ng-model="cachedNotifications.emailNotifications.deviationEntered" btn-radio="true">Yes</label>
+					<label id="deviationEntered_emailNotification_no" class="btn btn-primary switch switch-no" ng-model="cachedNotifications.emailNotifications.deviationEntered" btn-radio="false">No</label>
+				</td -->
+			</tr>	
+		<tbody></table>
+		</switchArray>
+		<br>
+		<div class="validation-error" ng-show="dialog.editProtocolNotifications.invalidEmails.length">{{dialog.editProtocolNotifications.labels.invalidEmails}}: {{dialog.editProtocolNotifications.invalidEmails}}</div>
+		<label class="protocol-label inline">{{dialog.editProtocolNotifications.labels.defaultNotificationEmails}}:&nbsp;</label>
+		<input id="notifiedEmailsInput" type="text" ng-model="cachedNotifications.defaultNotificationEmails" style="margin-top:3px; width:346px;" title="{{dialog.editProtocolNotifications.labels.defaultNotificationEmailsTip}}" placeholder="{{dialog.editProtocolNotifications.labels.defaultNotificationEmailsTip}}">
+	</div>
+</script>
+
+<script type="text/ng-template" id="template.dialog.editExperiment">
+	<table class="highlightHelpLayout editExperiment"><tbody>
+		<tr>
+			<td class="protocol-field">
+				<label class="protocol-label">{{dialog.editExperiment.labels.type.field}}</label>
+				<select id="experimentTypeSelect" ng-model="cachedExperiment.type" style="width: 100%" ng-options="option.type as option.name for option in dataTypeOptionsArray"></select>
+			</td>
+			<td class="validation-error protocol-directions" ng-show="dialog.editExperiment.labels.validationErrors.type" ng-bind="dialog.editExperiment.labels.validationErrors.type"></td>
+			<td class="protocol-directions" ng-bind-html="dialog.editExperiment.labels.type.directions" ng-hide="dialog.editExperiment.labels.validationErrors.type"></td>
+		</tr>
+		<tr>
+			<td class="protocol-field">
+				<label class="protocol-label">{{dialog.editExperiment.labels.subtype.field}}</label>
+				<input id="experimentSubtype" type="text" ng-model="cachedExperiment.subtype" style="width: 100%"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editExperiment.labels.subtype.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-field">
+				<label class="protocol-label">{{dialog.editExperiment.labels.imageAssessors.field}}</label>
+				<div id="imageAssessorList">
+					<div ng-repeat="assessor in cachedExperiment.expectedAssessors">
+						<select id="addAssessor{{$index}}" class="assessor-selection" ng-model="cachedExperiment.expectedAssessors[$index].type" ng-options="option.type as option.name for option in assessorTypeOptionsArray"></select>
+						<span class="icon icon-sm icon-status icon-trash" style="float: right; margin-top: 3px;" ng-click="removeAssessorFromDialog($index)"></span><br>
+					</div>
+				</div>
+				<button id="addAssessor" ng-click="addAssessorToDialog()">&#x2B;&nbsp;{{dialog.editExperiment.labels.imageAssessors.button}}</button>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editExperiment.labels.imageAssessors.directions"></td>
+		</tr>
+	<tbody></table>
+</script>
+
+<script type="text/ng-template" id="template.assessorSelection">
+	<select class="assessor-selection" ng-model="cachedExperiment.expectedAssessors" ng-options="option.type as option.name for option in assessorTypeOptionsArray">
+		<option ng-repeat="assessorType in assessorTypeOptionsArray" value="assessorType.type">{{assessorType.name}}</option>
+	</select>
+	<span class="icon icon-sm icon-status icon-trash" style="float: right; margin-top: 3px;"></span><br>
+</script>
+
+<script type="text/ng-template" id="template.dialog.editArm">
+	<div class="dialogHeader">{{dialog.editArm.labels.header}}</div>
+	<br>
+	<label class="protocol-label">The protocols module does not yet fully support multiple arm projects for this release.</label>
+	<!-- table class="highlightHelpLayout editArm"><tbody>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label">{{dialog.editArm.labels.sortOrder.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input type="text" ng-model="cachedArm.sortOrder" style="width: 50px"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editArm.labels.sortOrder.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.editArm.labels.name.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input type="text" ng-model="cachedArm.name" style="width: 100%"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editArm.labels.name.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.editArm.labels.description.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input type="text" ng-model="cachedArm.description" style="width: 100%"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editArm.labels.description.directions"></td>
+		</tr>
+		<tr ng-show="protocol.arms">
+			<td class="protocol-label">
+				<label class="protocol-label" style="width: 128px">{{dialog.editArm.labels.copyFromArm.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<select ng-model="copySettings.fromVisit" ng-options="option.value as option.name for option in visitTypeOptions" style="width: 100%;"></select>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editArm.labels.copyFromArm.directions"></td>
+		</tr>
+	<tbody></table -->
+</script>
+
+<script type="text/ng-template" id="template.dialog.editVisitType">
+	<div class="dialogHeader" ng-show="protocol.visitTypes.length" ng-bind="dialog.editVisitType.labels.header"></div>
+	<div class="dialogHeader" ng-hide="protocol.visitTypes.length" ng-bind="dialog.editVisitType.labels.firstHeader"></div>
+	<br>
+	<table class="highlightHelpLayout editVisit"><tbody>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label">{{dialog.editVisitType.labels.sortOrder.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input id="visitOrder" type="text" class="numeric" ng-model="cachedVisit.sortOrder" ng-disabled="!protocol.visitTypes.length" style="width: 50px"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editVisitType.labels.sortOrder.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.editVisitType.labels.name.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input id="visitName" type="text" ng-model="cachedVisit.name" style="width: 100%"/>
+			</td>
+			<td class="validation-error protocol-directions" ng-show="dialog.editVisitType.labels.validationErrors.name" ng-bind="dialog.editVisitType.labels.validationErrors.name"></td>
+			<td class="protocol-directions" ng-hide="dialog.editVisitType.labels.validationErrors.name" ng-bind-html="dialog.editVisitType.labels.name.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label inline">{{dialog.editVisitType.labels.description.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input id="visitDescription" type="text" ng-model="cachedVisit.description" style="width: 100%"/>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editVisitType.labels.description.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label">{{dialog.editVisitType.labels.delta.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<input id="visitOffset" type="text" ng-model="cachedVisit.delta" ng-disabled="!protocol.visitTypes.length" class="numeric" style="width: 50px"/>&nbsp;{{dialog.editVisitType.labels.deltaUnits}}
+			</td>
+			<td class="validation-error protocol-directions" ng-show="dialog.editVisitType.labels.validationErrors.delta" ng-bind="dialog.editVisitType.labels.validationErrors.delta"></td>
+			<td class="protocol-directions" ng-hide="dialog.editVisitType.labels.validationErrors.delta" ng-bind-html="dialog.editVisitType.labels.delta.directions"></td>
+		</tr>
+		<tr>
+			<td class="protocol-label">
+				<label class="protocol-label">{{dialog.editVisitType.labels.window.field}}</label>
+			</td>
+			<td class="protocol-field">
+				-&nbsp;<input id="deltaLow" type="text" class="numeric" ng-model="cachedVisit.deltaLow" ng-disabled="!protocol.visitTypes.length" style="width: 40px"/>&nbsp;/&nbsp;+
+				<input id="deltaHigh" type="text" class="numeric" ng-model="cachedVisit.deltaHigh" ng-disabled="!protocol.visitTypes.length" style="width: 40px"/>&nbsp;{{dialog.editVisitType.labels.deltaUnits}}
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editVisitType.labels.window.directions"></td>
+		</tr>
+		<tr ng-show="protocol.visitTypes">
+			<td class="protocol-label">
+				<label class="protocol-label" style="width: 128px">{{dialog.editVisitType.labels.copyFromVisit.field}}</label>
+			</td>
+			<td class="protocol-field">
+				<select id="copyVisitExperiments" ng-model="copySettings.fromVisit" ng-options="option.value as option.name for option in visitTypeOptions" style="width: 100%;"></select>
+			</td>
+			<td class="protocol-directions" ng-bind-html="dialog.editVisitType.labels.copyFromVisit.directions"></td>
+		</tr>
+	<tbody></table>
+</script>
+
+<script type="text/ng-template" id="template.dialog.confirm.unusedExperiments">
+	<div class="dialogHeader" ng-bind="dialog.confirm.unusedExperiments.labels.question"></div>
+	<br>
+	<div ng-bind-html="dialog.confirm.unusedExperiments.labels.directions"></div>
+	<br>
+	<div style="color:#AA0000;">
+		<ul>
+			<li ng-repeat="exp in unusedExperiments">{{dataTypeOptions[exp.type]}} <span style="font-size:small" ng-show="exp.subtype"><br>&nbsp;&nbsp;&nbsp;{{exp.subtype}}</li>
+		</ul>
+	</div>
+</script>
+
+<script type="text/javascript">
+var msie;
+var firefox;
+var safari;
+var chrome;
+var protTabs;
+var allProjects = [];
+var availableProjects = '';
+var availableProjectsSelected = [];
+var projectsUsingSelected = [];
+var protocols = [];
+var protocol = {};
+var enabledUsers = [];
+var protocolWrapper = null;
+var experiment = null;
+var selectedProtocol;
+var protocolSaved = true;
+var disableUserWhiteListEdit = false;
+var expandedExperiments = [];
+var expDialogWidth = 670, expDialogHeight = 180, expDialogInc = 32, expDialogMax = 500;
+var showUserList = $showUserList;
+
+var dataTypeOptions = { '':'[SELECT]'
+#foreach($dt in $dataTypeOptions)
+    , '$dt.getValue()':'$dt.getLabel()'
+#end
+};
+var assessorTypeOptions = { '':'[SELECT]'
+#foreach($at in $assessorTypeOptions)
+    , '$at.getValue()':'$at.getLabel()'
+#end
+};
+
+$(document).ready(function(){
+  // Stupid hack to reload the page when Angular doesn't initialize properly for some reason (probably due to all the YUI crap on the page)
+  setTimeout(function(){
+    if(!$('.ng-scope')[0]){
+      location.reload();
+    }
+  }, 100);
+
+  $('.leftBar').remove();
+  msie = /Trident/.test(navigator.userAgent);
+  safari = /AppleWebKit/.test(navigator.userAgent);
+  firefox = /Firefox/.test(navigator.userAgent);
+  chrome = /Chrome/.test(navigator.userAgent);
+  if(chrome){safari = false;}
+});
+
+//Turn this into a service
+#if ($user.isSiteAdmin())
+  var getExistingProjectsUrl = '$content.getURI('')/data/projects?format=application/json&sortBy=name&'+noCache();
+#else
+  var getExistingProjectsUrl = '$content.getURI('')/data/projects?format=application/json&sortBy=name&owner=true&'+noCache();
+#end
+
+function resizeExperimentDialog(numItems, extraHeight){
+  if(!extraHeight){ extraHeight = 0; }
+  var expDialog = $('div.xmodal');
+  var newHeight = (expDialogInc * (numItems)) + expDialogHeight + extraHeight;
+  if(extraHeight < 0){ newHeight = expDialogHeight; }
+  if(newHeight < expDialogMax){
+    expDialog.css("height", newHeight);
+    xmodal.resize(expDialog);
+  }  
+};
+</script>

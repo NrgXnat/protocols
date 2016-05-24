@@ -1,0 +1,383 @@
+## modal windows to alter visit and subtype on the experiment edit page
+<tr>
+    <th align="left">Visit</th>
+    <td>
+        <table>
+            <tr>
+                <td>
+                    <div id="visit_placeholder">$!visit_name</div><input type="hidden" id="$om.getXSIType()/visit" name="$om.getXSIType()/visit" value="$!om.getVisit()"/>
+                </td>
+                <td>
+                    <a onclick="modifyVisit()">
+                        <img border="0" src="$content.getURI("images/e.gif")"/>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <th align="left">Subtype</th>
+    <td>
+        <table>
+            <tr>
+                <td>
+                    <div id="subtype_placeholder">$!om.getProtocol()</div><input type="hidden" id="$om.getXSIType()/protocol" name="$om.getXSIType()/protocol" value="$!om.getProtocol()"/>
+                </td>
+                <td>
+                    <a onclick="modifySubtype()">
+                        <img border="0" src="$content.getURI("images/e.gif")"/>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+
+
+<script type="text/javascript">
+
+function modifyVisit(){
+    if(window.visitEditor==undefined){
+        var config =new Object();
+        if(window.currentID!=""){
+            config.uri=serverRoot +"/REST/projects/" + window.currentProject +"/subjects/" + window.currentSubject + "/experiments/$om.getId()";
+        }
+        window.visitEditor=new VisitEditor(config);
+        window.visitEditor.onModification.subscribe(function (obj){
+            document.getElementById("visit_placeholder").innerHTML=window.currentVisitName;
+            document.getElementById("$om.getXSIType()/visit").value=window.currentVisit;
+            confirmValues();
+        });
+    }
+    window.visitEditor.render();
+    window.visitEditor.panel.show();
+}
+
+function modifySubtype(){
+    if(window.subtypeEditor==undefined){
+        var config =new Object();
+        if(window.currentID!=""){
+            config.uri=serverRoot +"/REST/projects/" + window.currentProject +"/subjects/" + window.currentSubject + "/experiments/$om.getId()";
+        }
+        window.subtypeEditor=new SubtypeEditor(config);
+        window.subtypeEditor.onModification.subscribe(function (obj){
+            document.getElementById("subtype_placeholder").innerText=window.currentSubtype;
+            document.getElementById("$om.getXSIType()/protocol").value=window.currentSubtype;
+            confirmValues();
+        });
+    }
+    window.subtypeEditor.render();
+    window.subtypeEditor.panel.show();
+}
+
+function SubtypeEditor(_config) {
+    this.config = _config;
+
+    if (this.config.header == undefined) {
+        this.config.header = 'Subtype';
+    }
+
+    this.onModification = new YAHOO.util.CustomEvent("modification", this);
+
+    this.render = function () {
+        if (this.panel == undefined) {
+            var bd = document.createElement("form");
+            var table = document.createElement("table");
+            var tb = document.createElement("tbody");
+            table.appendChild(tb);
+            bd.appendChild(table);
+
+            window.subtypeInput = document.createElement("input");
+            window.subtypeInput.id = "new_subtype";
+            window.subtypeInput.value = XNAT.utils.unescapeXML("$!om.getProtocol().replaceAll("\\", "\\\\")");
+            window.subtypeInput.name = "new_subtype";
+            window.currentSubtype = "$!om.getProtocol().replaceAll("\\", "\\\\")";
+
+            this.subtypeContainer = document.createElement("div");
+            this.subtypeContainer.id = "complete_container";
+            this.subtypeContainer.width = "100px";
+            this.subtypeContainer.appendChild(window.subtypeInput);
+
+            //modality
+            tr = document.createElement("tr");
+            td1 = document.createElement("th");
+            td2 = document.createElement("td");
+            td3 = document.createElement("td");
+
+            td1.innerHTML = this.config.header + ":";
+            td1.align = "left";
+
+            td2.appendChild(this.subtypeContainer);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tb.appendChild(tr);
+
+            this.panel = new YAHOO.widget.Dialog("subtypeDialog", {
+                close:true,
+                //width:"350px",
+                //zIndex:9,
+                underlay:"shadow",
+                modal:true,
+                fixedCenter:true,
+                visible:false
+            });
+            this.panel.handleEnter = function () {
+                var subtype = this.form.new_subtype;
+                window.selectedSubtype = subtype.value.trim();
+                if (window.selectedSubtype == window.currentSubtype || window.selectedSubtype == XNAT.utils.escapeXML(window.currentSubtype)) {
+                    xModalMessage('Subtype Validation', 'No modification found.');
+                } else {
+                    if (this.selector.config.uri == undefined) {
+                        window.currentSubtype = window.selectedSubtype;
+                        closeModalPanel("modify_new_subtype");
+                        this.selector.onModification.fire();
+                        this.cancel();
+                    } else {
+                        var passthrough= new XNAT.app.passThrough(XNAT.app._modifySubtype,this);
+                        passthrough.fire();
+                    }
+                }
+            }
+            this.panel.setBody(bd);
+            this.panel.form = bd;
+        };
+        this.panel.handleCancel = function () { this.cancel(); };
+
+        var buttons = [
+            {text:"Modify", handler:{fn:this.panel.handleEnter}, isDefault:true},
+            {text:"Cancel", handler:{fn:this.panel.handleCancel}}
+        ];
+
+        var cancelListener = new YAHOO.util.KeyListener(document, { keys:27 }, { fn:this.panel.handleCancel, scope:this.panel, correctScope:true });
+        var enterListener  = new YAHOO.util.KeyListener(document, { keys:13 }, { fn:this.panel.handleEnter,  scope:this.panel, correctScope:true });
+
+        this.panel.setHeader("Subtype modification");
+        this.panel.selector = this;
+        this.panel.cfg.queueProperty("keyListeners", [cancelListener, enterListener]);
+        this.panel.cfg.queueProperty("buttons", buttons);
+        this.panel.render("page_body");
+        this.panel.show();
+    }
+
+    window.exptLoader.onLoadComplete.subscribe(function (obj) {
+        closeModalPanel("subtypes_loading");
+
+        window.subtypeInput.disabled = false;
+    });
+
+    openModalPanel("subtypes_loading", "Loading " + this.config.header + "s...");
+    window.exptLoader.load(window.currentProject);
+}
+
+XNAT.app._modifySubtype=function(arg1,arg2,container){
+    openModalPanel("modify_new_subtype", "Modifying " + this.selector.config.header + ", please wait...");
+
+    var settingsCallback = {
+        success:function (o) {
+            window.currentSubtype = window.selectedSubtype;
+            closeModalPanel("modify_new_subtype");
+            this.selector.onModification.fire();
+            this.cancel();
+        },
+        failure:function (o) {
+            if (!window.leaving) {
+                xModalMessage('ERROR (' + o.status + '): Failed to modify ' + XNAT.app.displayNames.singular.imageSession.toLowerCase(), o.responseText);
+                closeModalPanel("modify_new_subtype");
+            }
+        }, scope:this
+    }
+
+    // subtype/?subtype is a workaround to avoid Tomcat problems with encoded slashes
+    var uri = serverRoot + '/data/projects/' + currentProject + '/subjects/' + currentSubject + '/experiments/' + currentID + '/subtype?subtype=' + encodeURIComponent(window.selectedSubtype);
+    YAHOO.util.Connect.asyncRequest('PUT', uri + "&XNAT_CSRF=" + csrfToken, settingsCallback);
+}
+
+function VisitLoader(_options) {
+    this.options = _options;
+
+    if (this.options == undefined) {
+        this.options = new Object();
+        this.options.owner = true;
+        this.options.member = true;
+    }
+
+    this.onLoadComplete = new YAHOO.util.CustomEvent("load-complete", this);
+
+    this.init = function () {
+
+        //load from search xml from server
+        this.initCallback = {
+            success:this.completeInit,
+            failure:this.initFailure,
+            cache:false, // Turn off caching for IE
+            scope:this
+        }
+
+        YAHOO.util.Connect.asyncRequest('GET', serverRoot + '/REST/projects/' + currentProject + '/subjects/' + currentSubject + '/visits?sessionID=' + window.currentID + '&XNAT_CSRF=' + window.csrfToken + '&timestamp=' + (new Date()).getTime(), this.initCallback, null, this);
+    };
+
+    this.initFailure = function (o) {
+        if (!window.leaving) {
+            this.displayError("ERROR " + o.status + ": Failed to load visit list.");
+        }
+    };
+
+    this.completeInit = function (o) {
+        try {
+            this.list = JSON.parse(o.responseText);
+
+            if (this.options.selects != undefined) {
+                for (var selectC = 0; selectC < this.options.selects.length; selectC++) {
+                    var selectBox = this.options.selects[selectC];
+                    if (this.options.defaultValue != undefined) {
+                        renderVisits(selectBox, this.list, this.options.defaultValue);
+                    } else {
+                        renderVisits(selectBox, this.list, "");
+                    }
+                }
+            }
+
+            this.onLoadComplete.fire();
+        } catch (e) {
+            this.displayError("ERROR " + o.status + ": Failed to parse visit list.");
+        }
+
+    };
+
+    this.displayError = function (errorMsg) {
+        xModalMessage('Error', errorMsg);
+    }
+}
+
+function renderVisits(selectBox, list, defaultValue) {
+    while (selectBox.length > 0) {
+        selectBox.remove(0);
+    }
+
+    selectBox.options[0] = new Option("Select Visit", "");
+
+    for (var pC = 0; pC < list.length; pC++) {
+        var defaultSelected = (list[pC].id == defaultValue) ? true : false;
+        var opt = new Option(XNAT.utils.unescapeXML(list[pC].name + " " + list[pC].type), list[pC].id, defaultSelected, defaultSelected);
+        selectBox.options[pC + 1] = opt;
+        if (defaultSelected) {
+            selectBox.selectedIndex = (selectBox.options.length - 1);
+        }
+    }
+}
+
+function VisitEditor(_config) {
+    this.config = _config;
+
+    this.onModification = new YAHOO.util.CustomEvent("modification", this);
+
+    window.currentVisit = "$!om.getVisit()";
+    window.currentVisitName = "$!visit_name";
+
+    this.render = function () {
+        if (this.panel == undefined) {
+            this.panel = new YAHOO.widget.Dialog("visitDialog", {
+                close:true,
+                //width:"350px",
+                //height:"100px",
+                //zIndex:9,
+                underlay:"shadow",
+                modal:true,
+                fixedcenter:true,
+                visible:false
+            });
+            this.panel.setHeader("Visit modification");
+
+            var bd = document.createElement("form");
+
+            var table = document.createElement("table");
+            var tb = document.createElement("tbody");
+            table.appendChild(tb);
+            bd.appendChild(table);
+
+            //modality
+            tr = document.createElement("tr");
+            td1 = document.createElement("th");
+            td2 = document.createElement("td");
+
+            td1.innerHTML = "Visit:";
+            td1.align = "left";
+            this.selectBox = document.createElement("select");
+            this.selectBox.id = "new_visit";
+            this.selectBox.name = "new_visit";
+            td2.appendChild(this.selectBox);
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tb.appendChild(tr);
+
+            this.panel.setBody(bd);
+
+            this.panel.form = bd;
+
+            this.panel.selector = this;
+            var buttons = [
+                {text:"Modify", handler:{fn:function () {
+                    openModalPanel("modify_visit", "Modifying visit, please wait...");
+
+                    var callback = {
+                        success:function (o) {
+                            window.currentVisit = this.selector.new_visit;
+                            window.currentVisitName = this.selector.new_visit_name;
+                            closeModalPanel("modify_visit");
+                            this.selector.onModification.fire();
+                            this.cancel();
+                        },
+                        failure:function (o) {
+                            if (!window.leaving) {
+                                xModalMessage('Failed to modify visit.', o.responseText);
+                                closeModalPanel("modify_visit");
+                            }
+                        },
+                        cache:false, // Turn off caching for IE
+                        scope:this
+                    }
+                    this.selector.new_visit = this.form.new_visit.options[this.form.new_visit.selectedIndex].value;
+                    this.selector.new_visit_name = this.form.new_visit.options[this.form.new_visit.selectedIndex].text;
+
+                    if (this.selector.new_visit == window.currentVisit) {
+                        xModalMessage('Visit Validation', 'No visit modification found.');
+                        closeModalPanel("modify_visit");
+                        this.cancel();
+                    } else if (!this.selector.new_visit || this.selector.new_visit == "NULL") {
+                        var url = serverRoot + '/data/projects/' + currentProject + '/subjects/' + currentSubject + '/experiments/' + currentID + '/visit/' + window.currentVisit + "?XNAT_CSRF=" + csrfToken;
+                        YAHOO.util.Connect.asyncRequest('DELETE', url, callback);
+                        window.currentVisit = this.selector.new_visit;
+                        this.selector.new_visit_name = '';
+                        closeModalPanel("modify_visit");
+                        this.cancel();
+                    } else {
+                        var url = serverRoot + '/data/projects/' + currentProject + '/subjects/' + currentSubject + '/experiments/' + currentID + '/visit/' + this.selector.new_visit + "?XNAT_CSRF=" + csrfToken;
+                        YAHOO.util.Connect.asyncRequest('PUT', url, callback);
+                        window.currentVisit = this.selector.new_visit;
+                        closeModalPanel("modify_visit");
+                        this.cancel();
+                    }
+                }}, isDefault:true},
+                {text:"Cancel", handler:{fn:function () {
+                    this.cancel();
+                }}}
+            ];
+            this.panel.cfg.queueProperty("buttons", buttons);
+            this.panel.render("page_body");
+
+            this.panel.show();
+
+            if (window.visitLoader == undefined) {
+                window.visitLoader = new VisitLoader({selects:[this.selectBox], defaultValue:window.currentVisit, member:true, owner:true});
+                openModalPanel("visits_loading", "Loading visits...");
+                window.visitLoader.onLoadComplete.subscribe(function (obj) {
+                    closeModalPanel("visits_loading");
+                })
+                window.visitLoader.init();
+            }
+        }
+    }
+}
+</script>

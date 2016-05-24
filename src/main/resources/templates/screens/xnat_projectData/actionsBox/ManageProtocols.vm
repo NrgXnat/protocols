@@ -1,0 +1,6 @@
+<!-- Sequence: 30 -->
+#if ($user.isOwner($om.getProject()) || $user.isSiteAdmin())
+<li class="yuimenuitem">
+    <a class="yuimenuitemlabel" href="$content.getURI('')/app/template/ManageProtocol.vm">Manage Protocols</a>
+</li>
+#end

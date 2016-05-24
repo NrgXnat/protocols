@@ -1,0 +1,7 @@
+{
+	name: "$protocolsModule.getModuleId()",		
+	version: {
+		buildDate: "$protocolsModule.getBuildDate()",
+		changeset: "$protocolsModule.getChangeset()",
+	}
+}

@@ -1,0 +1,660 @@
+##<SELECT id="reasonTemplate" class="htmlTemplate">
+##    <OPTION value="">[SELECT]</OPTION>
+##    #foreach ($exceptionReason in $SubjectVisitInfo.getAllowedExceptions())
+##        <OPTION value = "$exceptionReason">$exceptionReason</OPTION>
+##    #end
+##</SELECT>
+
+<div id="visitWrapper">
+    ##set ($nextVisits = 1)
+    #foreach ($visit in $SubjectVisitInfo.getVisits())
+        ##set ($nextVisits = $visit.getNextVisits().size())
+    <div class="assessorsWrapper">
+				<div style="float:right;">
+					#if ($visit.getUserCanEdit())
+						#if (!$visit.getClosed())
+							<button class="toolbar" ng-click="deleteVisit('$!visit.getId()');"><span class="icon icon-sm icon-trash-gray"></span> {{labels.visits.deleteVisit}}</button>
+							<button class="toolbar" ng-click="editVisit('$!visit.getId()');"><span class="icon icon-sm icon-edit"></span> {{labels.visits.editVisit}}</button>
+						#end
+					#end
+					#if ($user.isOwner($project) || $user.isSiteAdmin())
+						#if ($visit.getClosed())
+							<button class="toolbar" ng-click="reopenVisit('$!visit.getId()');"><span class="icon icon-sm icon-return"></span> {{labels.visits.reopenVisit}}</button>
+						#elseif ($visit.getRequirementsFilled())
+							<button class="toolbar" ng-click="closeVisit('$!visit.getId()');"><span class="icon icon-sm icon-check-green"></span> {{labels.visits.closeVisit}}</button>
+						#end
+					#end
+				</div>
+        #if ($visit.getType())
+            <h4>
+						#if ($visit.getTerminal())
+							<span class="icon icon-sm icon-status icon-error"></span>
+							Terminal&nbsp;--&nbsp;
+						#end
+						$visit.getType() (Visit ID: $visit.getName())</h4>
+        #else
+            <h4>
+						#if ($visit.getTerminal())
+							<span class="icon icon-sm icon-status icon-error"></span>
+							Terminal&nbsp;
+						#end
+						#if ($visit.getAdHoc())
+							Ad Hoc Visit:&nbsp;
+						#end
+						$!visit.getName()
+						</h4>        
+        #end
+    <div class="visitHeader">
+        #if ($visit.getDate())
+            #set ($createdDate = "<strong>Visit Date</strong>: $!visit.getDate()")
+        #end
+        #if ($visit.getClosed())
+            #set ($visitStatus = "<strong>Visit Status</strong>: Closed")
+        #else
+            #set ($visitStatus = "<strong>Visit Status</strong>: Open")
+        #end
+        <span class="visitInfo visitDate">$!createdDate</span>
+        <span class="visitInfo visitStatus">$!visitStatus</span>
+        <span class="visitInfo visitDesc hidden">$!visit.getDescription()</span>
+                <!-- span class="visitInfo visitActions">
+                    <select class="visitActionSelect" onchange="doVisitAction(this)">
+                        <option selected disabled>Select Action</option>
+                    ## if user can open or close visits, provide controls
+                        #if ($user.isOwner($project) || $user.isSiteAdmin())
+                            #if ($visit.getClosed())
+                                <option data-action="openVisit" data-param="$visit.getId()">Reopen Visit</option>
+                            #elseif ($visit.getRequirementsFilled())
+                                <option data-action="closeVisit" data-param="$visit.getId()">Close Visit</option>
+                            #end
+                        #end
+                    ## if user can edit visits, provide edit/delete controls
+                        #if ($visit.getUserCanEdit())
+                            #set ($visitlink = $link.setAction("XDATActionRouter").addPathInfo("xdataction","edit").addPathInfo("search_element","xnat:pVisitData").addPathInfo("search_field","xnat:pvisiTData.ID").addPathInfo("search_value","$visit.getId()").toString())
+                            #if (!$visit.getClosed())
+																<option ng-click="editVisit('$!visit.getId()')">Edit Visit</option>
+                                ## <option data-action="editVisit" data-param="$visit.getId()">Edit Visit</option>
+                                ## <option data-action="editVisit" data-param="$visitlink/project/$!project">Edit Visit</option>
+                                #if ($user.isOwner($project) || $user.isSiteAdmin())
+                                    <option data-action="confirmDeleteVisit" data-param="$visit.getId()">Delete Visit</option>
+                                #end
+                            #end
+                        #end
+                    </select>
+                </span -->
+    </div>
+
+    <table class="assessorTable xnat-table"> <!-- exp table -->
+        <thead>
+            <tr class="expHeader">
+                <th class="expHeaderDate">Date</th>
+                <th class="expHeaderName">Experiment</th>
+                <th class="expHeaderLabel">Label</th>
+                <th class="expHeaderSubtype">Subtype</th>
+            </tr> <!-- expHeader -->
+        </thead>
+        <tbody>
+        <!-- Expected Experiments -->
+            #if ($visit.getExperiments().size() == 0)
+            <tr class="visitExperimentRowNone">
+                <td class="visitExperimentRowNone" colspan="4">This visit has no valid experiments</td>
+            </tr>
+            #else
+                #foreach ($expectedExperiment in $visit.getExperiments())
+                    #if ($!expectedExperiment.floating)
+                        #set ($floatingTip = '<span class="tip_icon" style="margin-right:3px;left:2px;top:3px;"><span class="tip shadowed" style="top:20px;z-index:10000;white-space:normal;left:-150px;width:300px;background-color:#ffc;">This experiment is not required for this visit type. Instead, it represents an unfulfilled requirement from an earlier visit that must be met now.</span></span>')
+                    #else
+                        #set ($floatingTip = '')
+                    #end
+                    #if ($!expectedExperiment.getExperiment().getClass().toString().equals("class org.nrg.xnat.protocol.entities.ProtocolException"))
+                    <!-- ProtocolException -->
+                        #set ($protocolException = $!expectedExperiment.getExperiment())
+                    <tr class="expRowException">
+                        <td class="expRowDate">$!expectedExperiment.getExperiment().get_date()</td>
+                        <td class="expRowName">$user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                            #if (!$visit.getClosed())
+                                #if ($user.isOwner($project) || $user.isSiteAdmin())
+                                    <a class="inline-link" title="Remove Deviation" ng-click="removeExperimentDeviation('$visit.getId()','$expectedExperiment.getType()','$!expectedExperiment.getEscapedSubtype()')">
+                                        <span class="icon icon-sm icon-cancel"></span>
+                                    </a>
+                                #end
+                            #end
+                            <a class="inline-link" href="javascript:" onclick="displayExplanationDialog('$protocolException.get_reason().replace("&apos;", "&#92;&apos;")', XNAT.utils.escapeXML('$!protocolException.get_explanation().replaceAll("\\", "\\\\").replace("&apos;", "&#92;&apos;")'))">
+                                Deviation Entered
+                            </a>
+                            $floatingTip
+                        </td>
+                        <td class="expRowLabel">Deviation</td>
+                        <td class="expRowSubtype">$!expectedExperiment.getSubtype()</td>
+                    </tr>
+                    #else
+                    <!-- Experiment -->
+                        #if($!expectedExperiment.getExperiment())
+                        <!-- Found Experiment -->
+                        <tr class="expRow">
+                            <td class="expRowDate">$!expectedExperiment.getExperiment().getDate()</td>
+                            <td class="expRowName">
+                                #set ($expectedExperimentID = $!expectedExperiment.getExperiment().getId())
+                                #set ($expectedExperimentField = "${expectedExperiment.getType()}.ID")
+                                #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$expectedExperiment.getType()).addPathInfo('search_field',$expectedExperimentField).addPathInfo('search_value',$expectedExperimentID).addPathInfo('popup',$popup).toString()")
+                                #if ($!expectedExperiment.getExperiment().hasProject($project))
+                                    #set ($visitlink= "$visitlink/project/$project")
+                                #end
+                                #if ($!expectedExperiment.getExperiment().canRead($user))
+                                    <a href="$visitlink" title="$!expectedExperiment.getExperiment().getIdentifier($!project)">
+                                        $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                    </a>
+                                #else
+                                    <a title="$!expectedExperiment.getExperiment().getIdentifier($!project)" class="plainText">
+                                        $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                    </a>
+                                #end
+                                $floatingTip
+                                #if(!$visit.getClosed())
+                                    #if ($user.canEdit("${expectedExperiment.getType()}/project", $project))
+                                        <a class="inline-link" title="remove from visit" onclick="removeFromVisit('$!visit.getId()','$!expectedExperiment.getExperiment().getId()')">
+                                            <span class="icon icon-sm icon-remove"></span>
+                                        </a>
+                                    #end
+                                #end
+                            </td>
+                            <td class="expRowLabel">$!expectedExperiment.getExperiment().getLabel()</td>
+                            <td class="expRowSubtype">$!expectedExperiment.getSubtype()</td>
+                        </tr>
+                        #else
+                            <!-- Missing Experiment -->
+                            #if($user.canEdit("${expectedExperiment.getType()}/project", $project) && ($expectedExperiment.getRequired() || !$visit.getClosed()))
+                            <tr #if ($expectedExperiment.getRequired()) class="expRowMissingRequired" #else class="expRowMissing" #end >
+                                #if ($expectedExperiment.getImageSession())
+                                    #set ($visitlink =$link.setAction("XDATActionRouter").addPathInfo('xdataction','LaunchUploadApplet').addPathInfo("search_field","xnat:subjectData.ID").addPathInfo("search_value","$subject.getId()").addPathInfo("project","$project").addPathInfo("visit","$visit.getId()").addQueryData("subtype","$!expectedExperiment.getSubtype()").toString())
+                                #else
+                                    #set ($visitlink =$link.setAction("CreateExperiment").addPathInfo("data_type","$expectedExperiment.getType()").addPathInfo("subject_id","$subject.getId()").addPathInfo("project","$project").addPathInfo("visit","$visit.getId()").toString())
+                                #end
+                                <td class="expRowDate">
+																	#if ($expectedExperiment.getCreateLink())
+                                    <a href="$visitlink" class="table-link-icon" title="Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())"><span class="icon icon-sm icon-add"></span></a>
+																	#end
+                                </td>
+                                <td class="expRowName">
+                                    #if ($visit.getClosed())
+                                        Open Visit to Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                    #elseif ($expectedExperiment.getCreateLink())
+                                        <a href="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())</a>
+																		#else
+																				$user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                    #end
+                                    $floatingTip
+                                </td>
+                                <td class="expRowLabel">
+                                    #if ($expectedExperiment.getRequired()) Required
+                                        #if (($user.isOwner($project) || $user.isSiteAdmin()) && !$visit.getClosed() && $SubjectVisitInfo.getProtocol().getAllowExceptions())
+                                            &nbsp;-&nbsp;<A class="exceptionCreate" onclick="openExceptionDialog('$visit.getId()', '$expectedExperiment.getType()', XNAT.utils.escapeXML('$!expectedExperiment.getSubtype().replaceAll("\\", "\\\\").replace("&apos;", "&#92;&apos;")'))">Create Deviation</A>
+                                        #end
+                                    #else
+                                        Optional
+                                    #end
+                                </td>
+                                <td class="expRowSubtype">$!expectedExperiment.getSubtype()</td>
+                            </tr>
+                            #end
+                        #end
+                    <!-- Expected Assessors -->
+                        #foreach ($assessor in $expectedExperiment.getAssessors())
+                            #if ($!assessor.getAssessor().getClass().toString().equals("class org.nrg.xnat.protocol.entities.ProtocolException"))
+                            <!-- ProtocolException -->
+                                #set ($protocolException = $!assessor.getAssessor())
+                            <TR class="assessorRowException">
+                                <TD class="assessorRowDate">$protocolException.get_date()</TD>
+                                <TD class="assessorRowName">&#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                    #if(!$visit.getClosed())
+                                        #if($user.isOwner($project) || $user.isSiteAdmin())
+                                            <a class="inline-link" title="Remove Deviation" ng-click="removeExperimentDeviation('$visit.getId()','$assessor.getType()','$!expectedExperiment.getExperiment().getId()')">
+                                                <span class="icon icon-sm icon-cancel"></span>
+                                            </a>
+                                        #end
+                                    #end
+                                    <a class="inline-link" href="javascript:" onclick="displayExplanationDialog('$protocolException.get_reason().replace("&apos;", "&#92;&apos;")', '$!protocolException.get_explanation().replace("&apos;", "&#92;&apos;")')">
+                                        Deviation Entered
+                                    </a>
+                                </TD>
+                                <TD class="assessorRowLabel">Deviation</TD>
+                                <TD class="assessorRowSubtype"></TD>
+                            </TR>
+                            #elseif ($!assessor.getAssessor())
+                            <!-- Found Assessor -->
+                            <TR class="assessorRow">
+                                <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+                                <TD class="assessorRowName">
+                                    #set ($assessorID = $!assessor.getAssessor().getId())
+                                    #set ($assessorField = "${assessor.getType()}.ID")
+                                    #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup).toString()")
+                                    #if ($!assessor.getAssessor().hasProject($project))
+                                        #set ($visitlink= "$visitlink/project/$project")
+                                    #end
+                                    #if ($!assessor.getAssessor().canRead($user))
+                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                    #else
+                                        &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                    #end
+                                </TD>
+                                <TD class="assessorRowLabel">
+                                    #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                                                $!assessor.getAssessor().getIdentifier($project,true)
+                                                            #elseif ($!assessor.getAssessor().getLabel())
+                                        $!assessor.getAssessor().getLabel()
+                                    #else
+                                        $!assessor.getAssessor().getId()
+                                    #end
+                                </TD>
+                                <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                            </TR>
+                            #else
+                            <!-- Missing Assessor -->
+                                #if ($user.canEdit("${expectedExperiment.getType()}/project", $project) && ($assessor.getRequired() || !$visit.getClosed()))
+                                <TR #if ($assessor.getRequired()) class="assessorRowMissingRequired" #else class="assessorRowMissing" #end >
+                                    #set ($experimentID = $!expectedExperiment.getExperiment().getId())
+                                    #set ($experimentField = "${expectedExperiment.getType()}.ID")
+                                    #set ($visitlink = $link.setAction("XDATActionRouter").addPathInfo("xdataction",$assessor.getAction()).addPathInfo("search_element",$expectedExperiment.getType()).addPathInfo("search_field",$experimentField).addPathInfo("search_value",$experimentID).addPathInfo("popup",$popup).toString())
+                                    <TD class="assessorRowDate">
+                                        #if(!$visit.getClosed())
+																					#if ($expectedExperiment.getCreateLink())
+                                            <a class="table-link-icon" href="$visitlink" title="Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())"><span class="icon icon-sm icon-add"></span></a>
+																					#end
+                                        #end
+                                    </TD>
+                                    <TD class="assessorRowName">
+                                        #if ($visit.getClosed())
+                                            Open Visit to Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                        #elseif ($expectedExperiment.getCreateLink())
+                                            &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+																				#else
+																						&#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                        #end
+                                    </TD>
+                                    <TD class="assessorRowLabel">
+                                        #if ($assessor.getRequired()) Required
+                                            #if (($user.isOwner($project) || $user.isSiteAdmin()) && !$visit.getClosed() && $SubjectVisitInfo.getProtocol().getAllowExceptions())
+                                                &nbsp;-&nbsp;<A class="exceptionCreate" onclick="openExceptionDialog('$visit.getId()', '$assessor.getType()', '$!expectedExperiment.getExperiment().getId()')">Create Deviation</A>
+                                            #end
+                                        #else
+                                            Optional
+                                        #end
+                                    </TD>
+                                    <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                                </TR>
+                                #end
+                            #end
+                        #end
+                    <!-- Unexpected Assessors -->
+                        #foreach ($assessor in $expectedExperiment.getUnexpectedAssessors())
+                            #if ($SubjectVisitInfo.getProtocol().getAllowUnexpectedExperiments())
+                                #set ($assessorRowType = "assessorRow")
+                            #else
+                                #set ($assessorRowType = "assessorRowInvalid")
+                            #end
+                        <TR class="$assessorRowType">
+                            <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+                            <TD class="assessorRowName">
+                                #set ($assessorID = $!assessor.getAssessor().getId())
+                                #set ($assessorField = "${assessor.getType()}.ID")
+                                #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup).toString()")
+                                #if ($!assessor.getAssessor().hasProject($project))
+                                    #set ($visitlink= "$visitlink/project/$project")
+                                #end
+                                #if ($!assessor.getAssessor().canRead($user))
+                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                #else
+                                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                #end
+                            </TD>
+                            <TD class="assessorRowLabel">
+                                #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                            $!assessor.getAssessor().getIdentifier($project,true)
+                                        #elseif ($!assessor.getAssessor().getLabel())
+                                    $!assessor.getAssessor().getLabel()
+                                #else
+                                    $!assessor.getAssessor().getId()
+                                #end
+                            </TD>
+                            <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                        </TR>
+                        #end
+                    #end
+                #end
+            #end
+            #if ($visit.getUnexpectedExperiments().size() > 0)
+            <TR class="visitExperimentExtraRow">
+                <TD class="visitExperimentExtraRow" colspan="4">Unexpected experiments in this visit</TD>
+            </TR>
+            #end
+        <!-- Unexpected Experiments -->
+            #if ($SubjectVisitInfo.getProtocol().getAllowUnexpectedExperiments())
+                #set ($rowType = "expRow")
+            #else
+                #set ($rowType = "expRowInvalid")
+            #end
+            #foreach ($unexpectedExperiment in $visit.getUnexpectedExperiments())
+            <TR class="$rowType">
+                <TD class="expRowDate">$!unexpectedExperiment.getExperiment().getDate()</TD>
+                <TD class="expRowName">
+                    #set ($unexpectedExperimentID = $!unexpectedExperiment.getExperiment().getId())
+                    #set ($unexpectedExperimentField = "${unexpectedExperiment.getType()}.ID")
+                    #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$unexpectedExperiment.getType()).addPathInfo('search_field',$unexpectedExperimentField).addPathInfo('search_value',$unexpectedExperimentID).addPathInfo('popup',$popup).toString()")
+                    #if ($!unexpectedExperiment.getExperiment().hasProject($project))
+                        #set ($visitlink= "$visitlink/project/$project")
+                    #end
+                    #if ($!unexpectedExperiment.getExperiment().canRead($user))
+                        <A href="$visitlink" title="$!unexpectedExperiment.getExperiment().getIdentifier($!project)">
+                            $user.getDisplayManager().getDisplayNameForElement($unexpectedExperiment.getType())
+                        </A>
+                    #else
+                        <A title="$!unexpectedExperiment.getExperiment().getIdentifier($!project)" class="plainText">
+                            $user.getDisplayManager().getDisplayNameForElement($unexpectedExperiment.getType())
+                        </A>
+                    #end
+                    #if(!$!visit.getClosed())
+                        <a class="inline-link" title="remove from visit" onclick="removeFromVisit('$!visit.getId()','$!unexpectedExperiment.getExperiment().getId()')">
+                            <span class="icon icon-sm icon-remove"></span>
+                        </a>
+                    #end
+                </TD>
+                <TD class="expRowLabel">$!unexpectedExperiment.getExperiment().getLabel()</TD>
+                <TD class="expRowSubtype">$!unexpectedExperiment.getSubtype()</TD>
+            </TR>
+                #foreach ($assessor in $unexpectedExperiment.getAssessors())
+                    #if ($SubjectVisitInfo.getProtocol().getAllowUnexpectedExperiments())
+                        #set ($assessorRowType = "assessorRow")
+                    #else
+                        #set ($assessorRowType = "assessorRowInvalid")
+                    #end
+                <TR class="$assessorRowType">
+                    <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+                    <TD class="assessorRowName">
+                        #set ($assessorID = $!assessor.getAssessor().getId())
+                        #set ($assessorField = "${assessor.getType()}.ID")
+                        #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup).toString()")
+                        #if ($!assessor.getAssessor().hasProject($project))
+                            #set ($visitlink= "$visitlink/project/$project")
+                        #end
+                        #if ($!assessor.getAssessor().canRead($user))
+                            &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                        #else
+                            &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                        #end
+                    </TD>
+                    <TD class="assessorRowLabel">
+                        #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                                    $!assessor.getAssessor().getIdentifier($project,true)
+                                                    #elseif ($!assessor.getAssessor().getLabel())
+                            $!assessor.getAssessor().getLabel()
+                        #else
+                            $!assessor.getAssessor().getId()
+                        #end
+                    </TD>
+                    <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                </TR>
+                #end
+            #end
+        </tbody>
+    </TABLE> <!--exp table -->
+			#if (!$visit.getNextVisitType() && !$visit.getAdHoc())
+        <div class="subject-completed-protocol"><span ng-show="protocolCompleted">Subject completed protocol. </span>No future visits expected.</div>
+				
+				<!-- This will be repeated under each visit. We don't want that! -->
+				
+      #end
+    </div> <!-- valid visit -->
+    #end
+
+
+<!-- expected visits -->
+#if($SubjectVisitInfo.getExpectedVisits() && $SubjectVisitInfo.getExpectedVisits().size() > 0)
+    <h4>Expected Visits</h4>
+    #foreach ($expectedVisit in $SubjectVisitInfo.getExpectedVisits())
+        <div class="assessorsWrapper expected-visit">
+						<div style="float:right;">
+							#if ($expectedVisit.getUserCanEdit())
+								<!-- button class="toolbar" ng-click="createVisitDeviation('$expectedVisit.getType()');"><span class="icon icon-sm icon-cancel"></span> {{labels.visits.createVisitDeviation}}</button -->
+								<button class="toolbar" ng-click="createVisit('$expectedVisit.getType()', $expectedVisit.isLastVisit());"><span class="icon icon-sm icon-event"></span> {{labels.visits.createVisit}}</button>
+							#end
+						</div>
+            <h4>$expectedVisit.getType()</h4>
+            <div class="visitHeader">
+                #if ($expectedVisit.getDate())
+                    #set ($expectedDate = "<strong>Expected Visit Date</strong>: <span id='expectedDate'>$expectedVisit.getDateFormatted()</span>")
+                #end
+                <span class="visitInfo visitDesc"><strong>$!expectedVisit.getDescription()</strong></span>
+                <span class="visitInfo visitDate">$!expectedDate</span>
+            </div>
+
+            <table class="assessorTable xnat-table">
+                <thead>
+                <tr>
+                    <th class="expHeaderDate">Date</th>
+                    <th class="expHeaderName">Experiment</th>
+                    <th class="expHeaderLabel">Label</th>
+                    <th class="expHeaderSubtype">Subtype</th>
+                </tr>
+                </thead>
+                <tbody>
+                    #if ($!expectedVisit.getExperiments().size() == 0)
+                    <TR class="visitExperimentRowNone"><TD colspan="4" class="visitExperimentRowNone">This visit has no experiments.</TD></TR>
+                    #else
+                        #foreach ($experiment in $!expectedVisit.getExperiments())
+                        <TR class="expRow">
+                            <TD class="expRowDate">$!experiment.getExperiment().getDate()</TD>
+                            <TD class="expRowName">
+                                #set ($experimentID = $!experiment.getExperiment().getId())
+                                #set ($experimentField = "${experiment.getType()}.ID")
+                                #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$experiment.getType()).addPathInfo('search_field',$experimentField).addPathInfo('search_value',$experimentID).addPathInfo('popup',$popup).toString()")
+                                #if ($!experiment.getExperiment().hasProject($project))
+                                    #set ($visitlink= "$visitlink/project/$project")
+                                #end
+                                #if ($!experiment.getExperiment().canRead($user))
+                                    <A href="$visitlink" title="$!experiment.getExperiment().getIdentifier($!project)">
+                                        $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                    </A>
+                                #else
+                                    <A title="$!experiment.getExperiment().getIdentifier($!project)" class="plainText">
+                                        $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                    </A>
+                                #end
+                            </TD>
+                            <TD class="expRowLabel">$!experiment.getExperiment().getLabel()</TD>
+                            <TD class="expRowSubtype">$!experiment.getSubtype()</TD>
+                        </TR>
+                            #foreach ($assessor in $experiment.getAssessors())
+                            <TR class="assessorRow">
+                                <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+                                <TD class="assessorRowName">
+                                    #set ($assessorID = $!assessor.getAssessor().getId())
+                                    #set ($assessorField = "${assessor.getType()}.ID")
+                                    #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup).toString()")
+                                    #if ($!assessor.getAssessor().hasProject($project))
+                                        #set ($visitlink= "$visitlink/project/$project")
+                                    #end
+                                    #if ($!assessor.getAssessor().canRead($user))
+                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                    #else
+                                        &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                    #end
+                                </TD>
+                                <TD class="assessorRowLabel">
+                                    #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                    $!assessor.getAssessor().getIdentifier($project,true)
+                                    #elseif ($!assessor.getAssessor().getLabel())
+                                        $!assessor.getAssessor().getLabel()
+                                    #else
+                                        $!assessor.getAssessor().getId()
+                                    #end
+                                </TD>
+                                <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                            </TR>
+                            #end
+                        #end
+                    #end
+                </tbody>
+            </table>
+        </div>
+    #end
+#end
+
+
+<!-- unexpected visits -->
+#if($SubjectVisitInfo.getUnexpectedVisits() && $SubjectVisitInfo.getUnexpectedVisits().size() > 0)
+    <h4><span class="icon icon-lg icon-alert" style="margin-bottom:-5px;"></span>Unexpected Visit(s) Found</h4>
+    <p class="visitHelp">This may take place if your study recently changed its protocol. A visit that was associated with this subject is no longer expected in this protocol.</p>
+
+    #foreach ($unexpectedVisit in $SubjectVisitInfo.getUnexpectedVisits())
+    <div class="assessorsWrapper">
+        <h4>$!unexpectedVisit.getType() (Visit ID: $unexpectedVisit.getName())</h4>
+				#if ($visit.getUserCanEdit())
+					#if (!$visit.getClosed())
+						<button class="toolbar" ng-click="deleteVisit('$!unexpectedVisit.getId()');"><span class="icon icon-sm icon-trash-gray"></span> {{labels.visits.deleteVisit}}</button>
+						<button class="toolbar" ng-click="editVisit('$!unexpectedVisit.getId()');"><span class="icon icon-sm icon-edit"></span> {{labels.visits.editVisit}}</button>
+					#end
+				#end
+        <div class="visitHeader invalidVisit">
+            #if ($unexpectedVisit.getDate())
+                #set ($createdDate = "<strong>Visit Date</strong>: $!unexpectedVisit.getDate()")
+            #end
+            #if ($unexpectedVisit.getClosed())
+                #set ($visitStatus = "<strong>Visit Status</strong>: Closed")
+            #else
+                #set ($visitStatus = "<strong>Visit Status</strong>: Open")
+            #end
+            <span class="visitDesc"><strong><span class="icon icon-xs icon-alert"></span>Invalid Visit</strong></span>
+            <span class="visitInfo visitDate">$!createdDate</span>
+            <span class="visitInfo visitStatus">$!visitStatus</span>
+            <span class="visitInfo visitDesc hidden">$!unexpectedVisit.getDescription()</span>
+                <!-- span class="visitInfo visitActions">
+                    <select class="visitActionSelect" onchange="doVisitAction(this)">
+                        <option selected disabled>Select Action</option>
+                    ## if user can edit visits, provide edit/delete controls
+                        #if ($unexpectedVisit.getUserCanEdit())
+                            #set ($visitlink = $link.setAction("XDATActionRouter").addPathInfo("xdataction","edit").addPathInfo("search_element","xnat:pVisitData").addPathInfo("search_field","xnat:pvisiTData.ID").addPathInfo("search_value","$!unexpectedVisit.getId()").toString())
+                            #if (!$visit.getClosed())
+																<option ng-click="editVisit('$!unexpectedVisit.getId()')">Edit Visit</option>
+                                ## <option data-action="editVisit" data-param="$!unexpectedVisit.getId()">Edit Visit</option>
+                                ## <option data-action="editVisit" data-param="$visitlink/project/$!project">Edit Visit</option>
+                                #if ($user.isOwner($project) || $user.isSiteAdmin())
+                                    <option data-action="confirmDeleteVisit" data-param="$unexpectedVisit.getId()">Delete Visit</option>
+                                #end
+                            #end
+                        #end
+                    </select>
+                </span -->
+        </div>
+
+        <table class="assessorTable xnat-table">
+            <thead>
+                <tr>
+                    <th class="expHeaderDate">Date</th>
+                    <th class="expHeaderName">Experiment</th>
+                    <th class="expHeaderLabel">Label</th>
+                    <th class="expHeaderSubtype">Subtype</th>
+                </tr>
+            </thead>
+            <tbody>
+                #if ($!unexpectedVisit.getExperiments().size() == 0)
+                <TR class="visitExperimentRowNone"><TD colspan="4" class="visitExperimentRowNone">This extra visit has no experiments.</TD></TR>
+                #else
+                    #foreach ($experiment in $!unexpectedVisit.getExperiments())
+                    <TR class="expRow">
+                        <TD class="expRowDate">$!experiment.getExperiment().getDate()</TD>
+                        <TD class="expRowName">
+                            #set ($experimentID = $!experiment.getExperiment().getId())
+                            #set ($experimentField = "${experiment.getType()}.ID")
+                            #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$experiment.getType()).addPathInfo('search_field',$experimentField).addPathInfo('search_value',$experimentID).addPathInfo('popup',$popup).toString()")
+                            #if ($!experiment.getExperiment().hasProject($project))
+                                #set ($visitlink= "$visitlink/project/$project")
+                            #end
+                            #if ($!experiment.getExperiment().canRead($user))
+                                <A href="$visitlink" title="$!experiment.getExperiment().getIdentifier($!project)">
+                                    $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                </A>
+                            #else
+                                <A title="$!experiment.getExperiment().getIdentifier($!project)" class="plainText">
+                                    $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                </A>
+                            #end
+                            #if(!$!unexpectedVisit.getClosed())
+                                <a class="inline-link" title="remove from visit" onclick="removeFromVisit('$!unexpectedVisit.getId()','$!experiment.getExperiment().getId()')">
+                                    <span class="icon icon-sm icon-remove"></span>
+                                </a>
+                            #end
+                        </TD>
+                        <TD class="expRowLabel">$!experiment.getExperiment().getLabel()</TD>
+                        <TD class="expRowSubtype">$!experiment.getSubtype()</TD>
+                    </TR>
+                        #foreach ($assessor in $experiment.getAssessors())
+                        <TR class="assessorRow">
+                            <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+                            <TD class="assessorRowName">
+                                #set ($assessorID = $!assessor.getAssessor().getId())
+                                #set ($assessorField = "${assessor.getType()}.ID")
+                                #set ($visitlink = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup).toString()")
+                                #if ($!assessor.getAssessor().hasProject($project))
+                                    #set ($visitlink= "$visitlink/project/$project")
+                                #end
+                                #if ($!assessor.getAssessor().canRead($user))
+                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                #else
+                                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                #end
+                            </TD>
+                            <TD class="assessorRowLabel">
+                                #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                            $!assessor.getAssessor().getIdentifier($project,true)
+                                            #elseif ($!assessor.getAssessor().getLabel())
+                                    $!assessor.getAssessor().getLabel()
+                                #else
+                                    $!assessor.getAssessor().getId()
+                                #end
+                            </TD>
+                            <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                        </TR>
+                        #end
+                    #end
+                #end
+
+            </tbody>
+        </table>
+    </div>
+    #end
+#end
+</div>
+
+
+
+<!-- modal content -->
+<!-- modal 1: "Create / edit visit modal" -->
+<div id="visit-edit" class="html-template existing">
+    <h4>Create A New Visit For Subject $subject.getId()</h4>
+    <form name="form1" id="visit-open-form" method="post" action="$link.setAction("ModifyPvisit")">
+        <input type="hidden" id="xnat:pVisitData/id" name="xnat:pVisitData/id" value>
+        <input type="hidden" id="xnat:pVisitData/project" name="xnat:pVisitData/project" value="$project" />
+        <input type="hidden" id="xnat:pVisitData/subject_id" name="xnat:pVisitData/subject_id" value="$subject.getId()" />
+				<input type="hidden" id="XNAT_CSRF" name="XNAT_CSRF">
+        <div class="form-control">
+            <label for="xnat:pVisitData/visit_type">Visit Type</label>
+            <select id="xnat:pVisitData/visit_type" name="xnat:pVisitData/visit_type" disabled='disabled'>
+                <option disabled>(Select a visit type)</option>
+            </select>
+        </div>
+        <div class="form-control">
+            <label for="xnat:pVisitData/date">Visit Date</label>
+            <input type="text" id="xnat:pVisitData/date" name="xnat:pVisitData/date" value />
+        </div>
+        <div class="form-control">
+            <label for="">Visit Label (Auto-generated)</label>
+            <input type="text" id="xnat:pVisitData/visit_name" name="xnat:pVisitData/visit_name" value />
+        </div>
+        <input type="hidden" name="eventSubmit_doSetup" id="eventSubmit_doSetup" value="Submit" disabled="true"/>
+    </form>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        insertCalendar(document.getElementById("xnat:pVisitData/date"), "Visit Date");
+    });
+</script>
+</div>
+

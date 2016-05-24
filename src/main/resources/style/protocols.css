@@ -1,0 +1,1030 @@
+@charset "utf-8";
+
+button{
+  border: solid 1px #000000;
+  border-radius: 0px !important;
+  padding: 8px 10px 8px 10px;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  max-height: none;
+  color: #000000 !important;
+}
+
+button.toolbar{
+  border: none;
+  font-size: 8pt;
+  font-weight: bold;
+  color: #888888 !important;
+	border-radius: 6px !important;
+	padding-left: 6px !important;
+}
+button.toolbar:hover{
+  background-color: #ebebeb !important;
+}
+
+div.protocolToolbar{
+	margin-top: 15px;
+
+}
+
+hr.toolbar{
+  margin-top: 3px;
+  margin-bottom: 15px;
+}
+
+.infolink{
+  cursor: pointer;
+	margin-top: 5px;
+}
+.help-header{
+	font-size: 12pt;
+  font-weight: bold;
+}
+
+.error{
+	color: #f00 !important;
+}
+.validation-error{
+	color: #f00 !important;
+	font-size: 9pt;
+  font-weight: bold;
+}
+
+.protocol-options-header {
+	background: url('images/nav_bkgd.png') center center repeat-x;
+	font-size: 8pt;
+  font-weight: bold;
+  padding: 2px;
+  height: 30px;
+  border: 1px #888 solid;
+}
+.protocol-options-title{
+	float: left;
+	margin-top: 5px;
+	margin-left: 4px;
+}
+.protocol-options-collapse{
+	float: right;
+	cursor: pointer;
+	margin-top: 4px;
+	margin-right: 4px;
+}
+.protocol-options-content{
+	border-left: solid 1px #888;
+	border-right: solid 1px #888;
+	border-bottom: solid 1px #888;
+  padding: 8px 10px 8px 10px;
+  background-color: #dddddd;
+}
+
+.assessor-selection{
+	width: 90%;
+	margin-bottom: 7px;
+}
+
+table.vtex td{
+	border: 1px solid #888;
+}
+button.add-experiment{
+	float: left;
+}
+button.add-visit{
+	float: right;
+}
+button.first-visit{
+	font-size: 11pt;
+	font-weight: bold;
+	color: #333 !important;
+}
+div.add-new-help-bubble{
+	float: left;
+	text-align: center;
+	position: relative;
+	left: 2px;
+	border: 1px solid #888;
+	border-radius: 8px;
+	background-color: #eee;
+	padding: 10px;
+	z-index: 9999999999;
+};
+.visible-bubble{
+	opacity: 1;
+}
+.hidden-bubble{
+	opacity: 0;
+}
+.hidden{
+	display: none;
+}
+.withfade {
+  -webkit-transition: all 1s ease-in-out;
+  -moz-transition: all 1s ease-in-out;
+  -ms-transition: all 1s ease-in-out;
+  -o-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+}
+th.vtex-exp-column {
+	width: 270px;
+}
+th.vtex-corner-cell{
+	border-top: none;
+	border-left: none;
+	background-color: #fff;
+	padding: 5px;
+	font-weight: none;
+}
+tr.vtex-header-row,
+tr.vtex-footer-row{
+	background-color: #ddd;
+	font-weight: bold;
+}
+td.vtex-experiment-row-header{
+	padding-left: 6px;
+	padding-right: 6px;
+}
+th.vtex-visit-row-header{
+	border: 1px solid #888;
+  padding-left: 6px;
+	padding-right: 6px;
+/*	max-width: 70px;
+	height: 150px;  */
+}
+div.vtex-visit-col-header{
+/* border: 1px solid red;
+	width: 150px;
+	height: 70px;
+	transform: rotate(270deg);
+	transform-origin: 0% 0%; */
+	height: 35px;
+	text-align: center;
+}
+div.vtex-visit-name{
+	font-size: 9pt;
+}
+div.vtex-visit-description{
+	font-size: 7pt;
+	font-weight: none;
+}
+
+tr.vtex-header-row td.select-all-cell,
+tr.vtex-experiment-row td:not(.vtex-experiment-row-header) {
+	text-align: center;
+}
+
+div.vtex-experiment-info div.vtex-experiment-type {
+	font-weight: bold;
+	font-size: 9pt;
+}
+div.vtex-experiment-info div.missing-datatype-error {
+	color: #f00;
+}
+div.vtex-experiment-info div.vtex-experiment-subtype {
+	font-size: 7pt;
+	line-height: 100%;
+}
+div.vtex-experiment-info div.vtex-experiment-subtype label{
+	font-weight: bold;
+	margin: 0px;
+}
+
+td.select-all-heading{
+	color: #555;
+	font-size: 8pt;
+}
+
+tr.vtex-footer-row td{
+  padding-left: 2px;
+	padding-right: 2px;
+}
+td.vtex-footer{
+	text-align: right;
+	color: #555;
+	font-size: 8pt;
+	height: 30px;
+}
+td.vtex-footer-summary{
+	font-size: 7pt;
+	text-align: center;
+	line-height: 9pt;
+}
+
+td div.vtex-experiment-info{
+	float: left;
+}
+
+td div.vtex-experiment-modification-buttons{
+	display: none;
+	float: right;
+	cursor: pointer;
+}
+
+td.vtex-experiment-row-header:hover div.vtex-experiment-modification-buttons{
+	display: inherit;
+	
+}
+
+th div.vtex-visit-modification-buttons{
+	display: none;
+	float: right;
+	cursor: pointer;
+	position: relative;
+	margin-top: -59px;
+	left: 7px;
+	border: 1px solid #888;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	background-color: #ddd;
+	padding: 3px 3px 3px 8px;
+	border-bottom: none;
+	z-index: 9999999999;
+}
+
+th.vtex-visit-row-header:hover div.vtex-visit-modification-buttons{
+	display: block;
+}
+
+#layout_content{
+  max-width: 960px;
+}
+/*
+.grayBorder{
+  border: 1px solid #bbbbbb;
+  padding: 12px;
+}
+*/
+.title{
+  font-size: 18pt;
+}
+.manageProtocols{
+  margin: 0px 0px 0px 20px;
+}
+.manageProtocols .subtitle{
+  font-weight: bold;
+  font-size: 13pt;
+}
+.manageProtocols p{
+  font-size: 9pt;
+  margin: 10px 0px 10px 0px;
+}
+#protocolSelection{
+  width: 925px;
+}
+#existingProtocolsDiv{
+  width: 55%;
+  float: left;
+}
+#createNewProtocolDiv{
+  width: 38%;
+  float: right;
+}
+#fileList{
+  width: 38%;
+  float: right;
+	margin-top: 20px;
+}
+/* Override xmodal dialog button colors */
+button.close{
+	opacity: 1.0;
+}
+
+.dialog-header-warning{
+	background-color: #ffeceb;
+	padding: 10px;
+  margin: -20px -20px 20px -20px;
+  color: #777777;
+	border-bottom: 1px solid black;	
+}
+.dialogHeader{
+	font-size: 11pt;
+	font-weight: bold;
+}
+.dialog-description{
+	margin-top: 6px !important;
+}
+.protocol-label{
+  display: block;
+  font-weight: bold;
+  color: #888888;
+  font-size: 9pt;
+  /*margin-top: 8px;*/
+}
+.inline{
+	display: inline;
+}
+.protocolNameField{
+  display: block;
+  font-size: 14pt;
+  width: 100%;
+  margin: 0px 0px 0px -2px;
+}
+.version-label{
+  float: right;
+  width: 100px;
+  text-align: right;
+  position: relative;
+  font-weight: bold;
+  color: #888888;
+  font-size: 9pt;
+  top: 5px;
+}
+.protocol-version{
+  background-color: #0168db;
+	border-radius: 6px;
+	color: #ffffff;
+  padding: 2px 4px 2px 4px;
+  margin: 0px 0px 0px 4px;
+}
+.select-version{
+	font-size: smaller;
+}
+
+.manage-protocol-section{
+  background-color: #ebebeb;
+  padding: 12px;
+}
+.existing-protocols-table{
+  margin: 15px 0px 10px 0px;
+	border: 2px solid #ffffff;
+	    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+.existing-protocols-header-row{
+  background-color: #d0d0d0;
+  padding: 5px 2px 5px 2px;
+	font-weight: bold;
+	text-align: left;
+}
+.existing-protocols-header-row th{
+  padding: 5px 4px 5px 4px;
+}
+.existing-protocols-table td{
+  padding: 4px;
+}
+.existing-protocols-table tr.odd{
+  background-color: #ffffff;
+}
+.existing-protocols-table tr.even{
+  background-color: #f5f5f5;
+}
+.existing-protocols-table td.protocols-name{
+	font-weight: bold;
+	color: #0000ff;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.existing-protocols-table tr:hover td{
+  background-color: #d5ffd5;
+}
+.existing-protocols-table td.protocols-last-updated{
+	font-size: 0.8em;
+}
+.existing-protocols-table td.protocols-version{
+	text-align: center;
+}
+
+.existingProtocolItem{
+  border: 1px #000000 solid;
+  display: block;
+  height: 18px;
+  margin-top: -1px;
+  padding: 8px 12px 6px 12px;
+  cursor: pointer;
+  cursor: hand;
+}
+.existingProtocolItem .name{
+  float: left;
+  font-size: 12pt;
+}
+.existingProtocolItem .version{
+  float: right;
+  font-size: 8pt;
+  font-weight: bold;
+  color: #777777;
+}
+
+button.start-new-protocol{
+	background-color: #3498db;
+	font-weight: bold;
+	font-size: 1.0em;
+}
+button.import-protocol{
+	background-color: #cccccc;
+	font-weight: bold;
+	font-size: 1.0em;
+}
+
+.user-selection{
+	height: 150px !important;
+	width: 265px !important;
+	max-width: 265px !important;
+	border: 1px solid #999999;
+	padding: 0px 3px 0px 3px;
+	overflow-y: auto;
+}
+.user-selection div span{
+	top: -3px;
+  position: relative;
+}
+
+table.projectSelection th,
+table.projectSelection td{
+	border: 1px solid #BBBBBB;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+table.projectSelection th{
+	background-color: #5d99e8;
+	color: #FFFFFF;
+	font-weight: bold;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+table.notificationSelection th,
+table.notificationSelection td{
+	border: 1px solid #BBBBBB;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+table.notificationSelection th{
+	background-color: #DDDDDD;
+	color: #000000;
+	font-weight: bold;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+table.highlightHelpLayout {
+	width: 100%;
+}
+
+table.highlightHelpLayout tr:hover{
+	background-color: #e4efff;
+}
+
+table.highlightHelpLayout td.protocol-label{
+	/* margin-top: 0px; */
+	padding-left: 10px;
+}
+
+table.highlightHelpLayout td.protocol-field{
+	/* width: 50%;*/
+	/* padding: 10px;*/
+}
+
+table.highlightHelpLayout td.protocol-directions{
+	color: #ffffff;
+	padding: 10px;
+}
+
+table.highlightHelpLayout tr:hover  td.protocol-directions{
+	color: #666666;
+}
+
+table.editExperiment .protocol-label{
+	/*width: 100px;*/
+}
+table.editExperiment .protocol-field{
+	padding: 10px 0px 10px 10px;
+	width: 50%;
+}
+table.editExperiment .protocol-directions{
+	width: 50%;
+}
+
+table.editVisit .protocol-label{
+	width: 100px;
+}
+table.editVisit .protocol-field{
+	width: 190px;
+}
+table.editVisit .protocol-directions{
+	width: 300px;
+}
+
+#wizardButtons{
+  position: relative;
+  top: 60px;
+}
+
+
+.animate-if {
+  background:white;
+  border:1px solid black;
+  padding:10px;
+}
+
+.animate-if.ng-enter, .animate-if.ng-leave {
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+}
+
+.animate-if.ng-enter,
+.animate-if.ng-leave.ng-leave-active {
+  opacity:0;
+}
+
+.animate-if.ng-leave,
+.animate-if.ng-enter.ng-enter-active {
+  opacity:1;
+}
+
+
+/* Override default Bootstrap tab styles until Mark develops something better */
+.nav-tabs li a {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+.nav-tabs li.active a {
+  color: #000000 !important;
+}
+.nav-tabs li:not(.active) a {
+  color: #676767;
+  background-color: #e0e0e0;
+}
+.tab-content {
+  background-color: #ffffff;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+
+switchArray li {
+	display: block;
+	margin-top: 5px;
+	margin-left: 3px;
+	clear: both;
+}
+switchArray li label:not(.btn){
+	font-size: 1em;
+	margin-bottom: 0px;
+}
+switchArray li .btn-group {
+	float: left;
+	margin-right: 10px;
+}
+switchArray li .btn-group label{
+	border-color: #333;
+}
+switchArray table .btn-group{
+	display: table-cell;
+}
+switchArray table .btn-group label{
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+switchArray .btn-group label.active{
+	background-color: #33f;
+	color: #fff;
+}
+switchArray .btn-group label:not(.active){
+	background-color: #aaa;
+	color: #fff;
+}
+switchArray li .btn-group label.active{
+	background-color: #33f;
+	color: #fff;
+}
+switchArray li .btn-group label:not(.active){
+	background-color: #aaa;
+	color: #fff;
+}
+.switch {
+	padding: 2px 4px 4px 4px !important;
+	width: 40px;
+	height: 25px;
+}
+.switch-yes{
+  border-top-left-radius:4px !important;
+	border-bottom-left-radius:4px !important;
+	background-color: #33f;
+	color: #fff;
+}
+.switch-no{
+  border-top-right-radius:4px !important;
+	border-bottom-right-radius:4px !important;
+	background-color: #eee !important;
+	color: #000 !important;
+}
+.switch-content{
+	margin: 6px 4px 9px 1px;
+}
+
+
+/************************************
+*	PROTOCOL TAB IN PROJECT PAGE	*
+************************************/
+
+.htmlTemplate {
+    display: none;
+}
+.advanced {
+    display: none;
+}
+div.lcolumn {
+    width:50%;
+    float:left;
+}
+div.rcolumn {
+    width:46%;
+    float:right;
+}
+label.column{
+    float:left;
+    width:48%;
+}
+input.column{
+    float:left;
+    width:48%;
+}
+table.ongoingExperiments,
+table.expectedExperiment{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+table.ongoingExperiments tr td,
+table.expectedExperiment tr td{
+    background: none;
+    padding: 0px;
+    border: 0px;
+    padding: 2px 4px 2px 4px;
+}
+table.ongoingExperimentDetails{
+    clear: both;
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    margin-bottom: -35px;
+    position: relative;
+    top: 0px;
+}
+table.experimentDetails{
+    display: none;
+    clear: both;
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    margin-bottom: -35px;
+    position: relative;
+    top: -23px;
+}
+table.ongoingExperimentDetails tr td,
+table.experimentDetails tr td{
+    background: none;
+    padding: 0px;
+    border: 0px;
+    padding: 2px 4px 2px 4px;
+}
+label.bold{
+    font-size: 9pt;
+    float: left;
+}
+.bold{
+    font-weight: bold;
+}
+.small{
+    font-size: 8pt;
+}
+
+.oeodd ,
+.vtodd {
+    background-color: #effaff;
+}
+.oeeven,
+.vteven {
+    background-color: #ddeffc;
+}
+.vsodd {
+    background-color: #fffaea;
+}
+.vseven {
+    background-color: #fcefdf;
+}
+.asodd {
+    background-color: #eefeee;
+}
+.aseven {
+    background-color: #e0f3e0;
+}
+.initial{
+    background-color: #d3ffd3 !important;
+}
+.terminal{
+    background-color: #ffd3d3 !important;
+}
+
+.missingDataType{
+    color: red;
+    font-weight: bold;
+}
+
+ul#ongoingExperimentsList,
+ul#visitTypeList,
+ul#visitSequenceList {
+    list-style:none;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+
+li.protocolOngoingExperiment,
+li.protocolVisitType,
+li.protocolNameType {
+    list-style-type: none;
+    margin: 10px 0px 0px 0px;
+    padding: 5px 0px 5px 0px;
+}
+
+div.protocolExpectedExperiments{
+    width: 98%;
+    margin: 0px 0px 0px 15px;
+}
+
+.expansion-link{
+    float: left;
+    cursor: pointer;
+    color: #000099;
+    font-size: 11px;
+    position: relative;
+    left: -15px;
+    top: -2px;
+    clear: none;
+}
+.expansion-icon{
+    width: 11px;
+    height: 11px;
+    position: relative;
+    top: 2px;
+    cursor: pointer;
+}
+.moveSection{
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    cursor: hand;
+}
+
+div.persistenceButtons {
+    float:left;
+}
+div.wizardButtons {
+    float:right;
+}
+.manageProtocolButton {
+    width: 90px;
+    height: 35px;
+    margin: 4px 0px 4px 0px;
+}
+/********************************
+*	SUBJECT REPORT - ASSESSORS	*
+********************************/
+
+.assessorsWrapper {
+  margin: 15px 0;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+}
+.assessorsWrapper h2, .assessorsWrapper h3 {
+    margin-bottom: .25em;
+}
+.assessorsHeader {
+    background: #949494;
+    font-weight: bold;
+}
+.assessorTable {width:100%;border-collapse: collapse; cellpadding:0px; cellspacing:0px; margin:0px;padding:0px}
+.assessorTable th { font-size: 11px; text-align: left; }
+.assessorHeader {background:#f8f8ff;}
+
+.assessorHeaderDate	{ width:100px; }
+.assessorHeaderDate,
+.assessorHeaderName,
+.assessorHeaderProj,
+.assessorHeaderLabel,
+.assessorHeaderSubtype,
+.assessorHeaderActions	{ border-bottom-style:solid; border-bottom-width:thin;border-bottom-color: #999999; font-weight:bold; font-size:11px; padding:5px;}
+
+.assessorRow {}
+.assessorRowMissing { /* color:#8b8989; */ }
+.assessorRowMissingRequired { /* background:#fffa89; color: #8b8989; */ }
+.assessorRowException { /* background:#f9dada; */ color: #999; }
+.assessorRowInvalid { /* background:#f9dada; */ color: #900; }
+
+.assessorRowDate 	{ width:100px;}
+.assessorRowDate,
+.assessorRowName,
+.assessorRowProj,
+.assessorRowLabel,
+.assessorRowSubtype,
+.assessorRowActions { font-size:11px;padding:3px;}
+
+.nopadding{padding:0px;}
+
+
+/***************************
+*	  PROJECT VISIT REPORT   *
+***************************/
+
+tbody#dataRows td.x_rs_td{
+  text-align: center;
+}
+.icon-status{
+  cursor: pointer;
+}
+.icon-status-exception{
+  position: relative !important;
+  top: 0px !important;
+  left: 0px !important;
+}
+
+/***************************
+*	  SUBJECT VISIT REPORT 	 *
+***************************/
+
+#layout_content {
+    padding-top: 0px;
+}
+
+#visitWrapper {
+    /* font-family:arial;
+    font-size:12px;
+    margin-left:-27px;
+    width:101px;
+    clear: both; */
+}
+.visit {
+    /* border-bottom: 1px solid #000000;
+    border-collapse: collapse;
+    margin:30px;
+    padding:10px;
+    width:700px;
+    margin-top: -10px; */
+}
+.visitHeader {
+    background: #d7d7d7;
+    border: 1px solid #ccc;
+    font-size: 11px;
+    margin:auto;
+    padding: 4px 6px;
+    position: relative;
+}
+.expected-visit{
+	border-style: dashed;
+	border-color: black;
+	border-width: 1px;
+	background-color: #f7f7f7;
+}
+.expected-visit .toolbar{
+	background-color: #f7f7f7 !important;
+	margin-top: 7px;
+}
+.terminal-visit{
+	background-color: #ffeceb;
+}
+.ad-hoc-visit{
+	background-color: #ffefc0;
+}
+.subject-completed-protocol{
+  background: #e0f0e7;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  padding: 6px 8px;
+  margin-top: 8px;
+	color: #666666;
+	font-weight: bold;
+}
+/*
+.validVisitActions{
+    text-align: right;
+    font-weight: bold;
+}
+.validVisitActions a{
+    color: #000000;
+    padding: 0px 0px 0px 20px;
+}
+*/
+.visitActions {
+    position: absolute;
+    right: -9px;
+    top: 2px;
+}
+.invalidVisit {
+    background: #f4a460;
+}
+
+.visitTab{
+    color:white;
+    padding:7px;
+    font-weight:bold;
+    font-size:17px;
+}
+.visitTabLeft{
+    width:160px;
+    border-left: 1px solid #000000;
+    border-top: 1px solid #000000;
+}
+.visitTabRight{
+    width:90px;
+    border-right: 1px solid #000000;
+    border-top: 1px solid #000000;
+}
+.visitOptional 	{
+    height:100%;
+    width:100px;
+    color:white;
+    padding:7px;
+    margin:0px;
+    font-weight:bold;
+    font-size:17px;
+}
+.visitTabCreate{
+    color:white;
+    width:160px;
+    border-left: 1px solid #000000;
+    border-right: 1px solid #000000;
+    border-top: 1px solid #000000;
+}
+p.visitHelp {
+    font-size: 12px;
+    max-width: 800px;
+    margin-bottom: 1em;
+}
+.visitName 		{ background:#6495ed; }
+.visitClosed 	{ background:#000033; }
+.visitOpen 		{ background:green; }
+.visitRequired 	{ background:#cc6633; }
+.visitOptional 	{ background:#8b8989; }
+.visitDesc {
+    margin-right: 1em;
+    text-align: left;
+}
+.visitInfo {
+    display: inline-block;
+    margin-right: 1em;
+}
+.expTable 	{
+    width:100%;
+    border-collapse: collapse;
+    margin:0px;
+    padding:0px;
+}
+.visitRow {
+    border-top: 1px solid #000000;
+    border-left: 1px solid #000000;
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+}
+.expHeader  {
+    background:#f8f8ff;
+}
+
+.expHeaderDate   { width:100px;}
+.expHeaderDate,
+.expHeaderName,
+.expHeaderProj,
+.expHeaderLabel,
+.expHeaderSubtype,
+.expHeaderActions	{ border-bottom-style:solid; border-bottom-width:thin;border-bottom-color: #999999; font-weight:bold; font-size:11px; padding:5px;}
+
+.expRow {}
+.expRowMissing 			{ /* color:#8b8989; */ }
+.expRowMissingRequired 	{ /* background:#fffa89; color: #8b8989; */ }
+.expRowException 		{ /* background:#f9dada; */ color: #999; }
+.expRowInvalid          { /* background:#f9dada; */ color: #900; }
+
+.expRowDate		{ width: 100px; }
+.expRowDate,
+.expRowName,
+.expRowProj,
+.expRowLabel,
+.expRowSubtype,
+.expRowActions { font-size:11px;padding:3px;}
+
+.visitExperimentRowNone,
+.visitExperimentMissingRowNone,
+.visitExperimentMissingRow,
+.visitExperimentExtraRow,
+.createVisitRow {
+    background:#f8f8ff;
+    font-weight:bold;
+    font-size:11px;
+    color:#626262;
+    padding:6px;
+    border-top-style:solid;
+    border-top-width:thin;
+    border-top-color: #999999;
+}
+
+.nopadding{ padding:0px; }
+
+.inline-link {
+    float: right;
+    margin-left: 10px;
+}
+.table-link-icon {
+    display: block;
+    margin: 0 auto;
+    width: 16px;
+}

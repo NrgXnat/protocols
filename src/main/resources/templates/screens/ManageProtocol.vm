@@ -1,0 +1,98 @@
+<div ng-app="manageProtocols" ng-controller="ProtocolsController" id="manageProtocolsDiv" class="manageProtocols" ng-cloak>
+  <div class="title" style="position: relative; top: -12px">{{labels.title.manageProtocols}}</div>
+  <div id="protocolSelection">
+    <div id="existingProtocolsDiv" class="manage-protocol-section">
+      <label for="existingProtocols" id="existingProtocolsLabel" class="subtitle">{{labels.title.existingProtocols}}</label>
+      <input type="file" id="importFiles" name="importFiles[]" multiple onchange="handleFileSelect(this);" style="display:none"/>
+			<table class="existing-protocols-table" ng-if="protocols.length>0"><tbody>
+				<tr class="existing-protocols-header-row">
+					<th style="width:310px">
+						{{labels.protocolsTable.header.name}}
+					</th>
+					<th style="width:120px">
+						{{labels.protocolsTable.header.lastUpdated}}
+					</th>
+					<th style="width:48px">
+						{{labels.protocolsTable.header.version}}
+					</th>
+				</tr>
+				<tr class="existing-protocols-row" ng-repeat="protocol in protocols" ng-class-odd="'odd'" ng-class-even="'even'">
+					<td id="protocol_{{protocol.name}}" class="protocols-name" ng-click="editProtocol($event)" value="{{protocol.protocolId}}">{{protocol.name}}</td>
+					<td class="protocols-last-updated">{{protocol.timestamp | date:'MM/dd/yyyy @ h:mma'}}</td>
+					<td id="version_{{protocol.name}}" class="protocols-version">{{protocol.version}}</td>
+				</tr>
+			</tbody></table>
+			<div ng-if="protocols.length==0"><br>{{labels.protocolsTable.noExistingProtocols}}<br></div>
+    </div>
+    <div id="createNewProtocolDiv" class="manage-protocol-section">
+      <div class="subtitle">{{labels.title.createNewProtocol}}</div>
+      <div ng-bind-html="labels.newProtocol.directions"></div><br/>
+      <button id="newProtocolButton" class="start-new-protocol" ng-click="startNewProtocol()">{{labels.newProtocol.startButton}}</button>
+			<button id="importProtocolButton" class="import-protocol" ng-click="importProtocol()">{{labels.newProtocol.importButton}}</button>
+    </div>
+  </div>
+  <div id="fileList" class="manage-protocol-section" ng-show="fileImportList.length">
+		<div style="font-weight:bold;" ng-bind="labels.importAction"></div>
+		<ul style="list-style:none; margin-left: -30px;">
+			<li ng-repeat="pfile in fileImportList">
+				<span class="icon icon-sm icon-status icon-check-green" ng-show="pfile.success"></span>
+				<span class="icon icon-sm icon-status icon-check-red" ng-show="pfile.failure"></span>
+				<strong>{{pfile.name}}</strong> - {{pfile.size}} <span ng-bind="labels.bytes"></span>
+				<span ng-show="pfile.lastMofifiedDate"><br><span ng-bind="labels.lastModified"></span>
+				<span ng-bind="pfile.lastMofifiedDate"></span></span>
+			</li>
+		</ul>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+var protocol = {};
+var protocolWrapper = null;
+var xnatUri = '$content.getURI('')';
+var getExistingProtocolsUrl = xnatUri+'/data/protocol';
+
+$(document).ready(function(){
+	$('.leftBar').remove();
+  // Stupid hack to reload the page when Angular doesn't initialize properly for some reason (probably due to all the YUI crap on the page)
+  setTimeout(function(){
+    if(!$('.ng-scope')[0]){
+      location.reload();
+    }
+		$('#mylogger').next().append('<small id="protocolsMetaData" onmouseover="showChangeset();" onmouseout="showBuildDate();" style="float:right; color: #888; font-size: 10px;">$protocolsModule.getModuleId() module <span id="moduleBuildDate">built: $protocolsModule.getBuildDate()</span><span id="moduleChangeset" style="display:none;">changeset: $protocolsModule.getChangeset()</span></small>');
+  }, 100);
+});
+function showBuildDate(){
+	$("#moduleBuildDate").show();
+	$("#moduleChangeset").hide();
+};
+function showChangeset(){
+	$("#moduleBuildDate").hide();
+	$("#moduleChangeset").show();
+};
+
+//Turn this into a service
+#if ($user.isSiteAdmin())
+  var getExistingProjectsUrl = '$content.getURI('')/data/projects?format=application/json&sortBy=name&'+noCache();
+#else
+  var getExistingProjectsUrl = '$content.getURI('')/data/projects?format=application/json&sortBy=name&owner=true&'+noCache();
+#end
+function noCache() {
+ return 'rnd='+new Date().getTime();
+};
+
+var postProtocolUrl = '$content.getURI('')/data/protocol/';
+
+</script>
+<br/>
+
+<link rel='stylesheet' href='$content.getURI("style/protocols.css")' />
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script -->
+<!-- script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.js"></script>
+<script src="$content.getURI('')/scripts/protocols/common.js"></script>
+<script src="$content.getURI('')/scripts/protocols/manage.js"></script>
+<script src="$content.getURI('')/scripts/protocols/services.js"></script>
+<script src="$content.getURI('')/scripts/protocols/directives.js"></script>
+<script src="$content.getURI('')/scripts/protocols/i18n/angular-locale_en-US.js"></script>

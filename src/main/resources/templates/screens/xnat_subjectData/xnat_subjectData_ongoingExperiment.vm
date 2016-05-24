@@ -1,0 +1,89 @@
+#if ($ongoingExperiment.getExperiment())
+    <TR class="assessorRow">
+        <TD class="assessorRowDate">$!ongoingExperiment.getExperiment().getDate()</TD>
+        <TD class="assessorRowName">
+            #set ($ongoingExperimentID = $!ongoingExperiment.getExperiment().getId())
+            #set ($ongoingExperimentField = "${ongoingExperiment.getType()}.ID")
+            #set ($url = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$ongoingExperiment.getType()).addPathInfo('search_field',$ongoingExperimentField).addPathInfo('search_value',$ongoingExperimentID).addPathInfo('popup',$popup)" )
+            #if ($!ongoingExperiment.getExperiment().hasProject($project))
+                #set ( $url= "$url/project/$project")
+            #end
+            #if ($!ongoingExperiment.getExperiment().canRead($user))
+                <a href="$url" title="$!ongoingExperiment.getExperiment().getIdentifier($!project)">$user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+            #else
+                <a title="$!ongoingExperiment.getExperiment().getIdentifier($!project)" class="plainText">$user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+            #end
+        </TD>
+        <TD class="assessorRowLabel">
+            #if ($!ongoingExperiment.getExperiment().getIdentifier($project,true))
+                                            $!ongoingExperiment.getExperiment().getIdentifier($project,true)
+                                            #elseif($!ongoingExperiment.getExperiment().getLabel())
+                $!ongoingExperiment.getExperiment().getLabel()
+            #else
+                $!ongoingExperiment.getExperiment().getId()
+            #end
+        </TD>
+        <TD class="assessorRowSubtype">$!ongoingExperiment.getSubtype()</TD>
+    </TR>
+    #foreach($assessor in $ongoingExperiment.getAssessors())
+        #if ($!assessor.getAssessor())
+        <TR class="assessorRow">
+            <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+            <TD class="assessorRowName">
+                #set ($assessorID = $!assessor.getAssessor().getId())
+                #set ($assessorField = "${assessor.getType()}.ID")
+                #set ($url = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup)" )
+                #if($!assessor.getAssessor().hasProject($project))
+                    #set ( $url= "$url/project/$project")
+                #end
+                #if($!assessor.getAssessor().canRead($user))
+                    &#8226;&nbsp;&nbsp;<a href="$url">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                #else
+                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                #end
+            </TD>
+            <TD class="assessorRowLabel">
+                #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                                    $!assessor.getAssessor().getIdentifier($project,true)
+                                                    #elseif($!assessor.getAssessor().getLabel())
+                    $!assessor.getAssessor().getLabel()
+                #else
+                    $!assessor.getAssessor().getId()
+                #end
+            </TD>
+            <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+        </TR>
+        #else
+            #if ($user.canEdit("${ongoingExperiment.getType()}/project", $project))
+            <TR class="assessorRowMissing">
+                <TD class="assessorRowDate"></TD>
+                <TD class="assessorRowName">
+                    #set ($experimentID = $!ongoingExperiment.getExperiment().getId())
+                    #set ($experimentField = "${ongoingExperiment.getType()}.ID")
+                    #set ($visitlink = $link.setAction("XDATActionRouter").addPathInfo("xdataction",$assessor.getAction()).addPathInfo("search_element",$ongoingExperiment.getType()).addPathInfo("search_field",$experimentField).addPathInfo("search_value",$experimentID).addPathInfo("popup",$popup).toString())
+                    &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                </TD>
+                <TD class="assessorRowLabel"></TD>
+                <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+                <TD class="assessorRowActions">&nbsp;</TD>
+            </TR>
+            #end
+        #end
+    #end
+#else
+    #if ($user.canEdit("${ongoingExperiment.getType()}/project", $project))
+        <TR class="expRowMissing">
+            <TD class="expRowDate">Missing</TD>
+            <TD class="expRowName">
+                #if ($ongoingExperiment.getImageSession())
+                    #set ($linkHack =$link.setAction("XDATActionRouter").addPathInfo('xdataction','LaunchUploadApplet').addPathInfo("search_field","xnat:subjectData.ID").addPathInfo("search_value","$subject.getId()").addPathInfo("project","$project").addPathInfo("subtype","$!ongoingExperiment.getSubtype()").toString())
+                #else
+                    #set ($linkHack =$link.setAction("CreateExperiment").addPathInfo("data_type","$ongoingExperiment.getType()").addPathInfo("subject_id","$subject.getId()").addPathInfo("project","$project").toString())
+                #end
+                <A HREF="$linkHack">Create $user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+            </TD>
+            <TD class="expRowLabel"></TD>
+            <TD class="expRowSubtype">$!ongoingExperiment.getSubtype()</TD>
+        </TR>
+    #end
+#end

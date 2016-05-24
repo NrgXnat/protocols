@@ -1,0 +1,124 @@
+## dropdown menus for visit and subtype on the subject assessor creation and launch upload applet screens
+<!-- Sequence: 50 -->
+
+#if (!$!visit && $!om.getVisit())
+    #set ($visit = $!om.getVisit())
+#end
+#if (!$!subtype)
+    #if ($!om.getSubtype())
+        #set ($subtype = $!om.getSubtype())
+    #elseif ($!om.getProtocol())
+        #set ($subtype = $!om.getProtocol())
+    #end
+#end
+
+#if ($item.getXSIType())
+    #set ($type = "$item.getXSIType()")
+    #set ($end = '/project')
+    #set ($projectLocation ="$type$end")
+    #set ($end = '/subject_id')
+    #set ($subjectLocation ="$type$end")
+    #set ($xsiPrefix = "${item.getXSIType()}.")
+#else
+    #set ($projectLocation ='project')
+    #set ($subjectLocation ='part_id')
+    #set ($xsiPrefix = "")
+#end
+
+<tr class="visitSubtypeSelector" style="display:none">
+    <th align="left"><label for="visit" class="select_label">Visit</label></th>
+    <td><select id="visit" name="$!{xsiPrefix}visit" style="min-width: 200px;"></select></td>
+</tr>
+<tr class="visitSubtypeSelector" style="display:none">
+    <th align="left"><label for="subtype" class="select_label">Subtype</label></th>
+    <td><input type="text" id="subtype" name="$!{xsiPrefix}protocol" style="min-width:200px;" value="$!subtype"/></td>
+    <!-- To my infinite frustration, the experiment data table still stores subtype under the name 'protocol'. -->
+    <!-- Additionally, the upload applet expects it to be called 'protocol' as well. -->
+    <!-- Thus the awkward shift in terminology. -->
+</tr>
+
+<script type="text/javascript">
+    function VisitSelector() {
+        var selectedVisit = "$!visit";
+        var selectedType = "$!subtype";
+
+        this.init = function() {
+            populateVisitMenu();
+            $(document.getElementById('$subjectLocation')).change(function(event){
+                populateVisitMenu();
+            });
+            $("#visit").change(function(event){
+                updateSelectedVisit($("#visit").val());
+            });
+            $("#subtype").change(function(event){
+                updateSelectedType($("#subtype").val());
+                populateVisitMenu();
+            });
+        }
+
+        function updateSelectedVisit(newSelectedVisit) {
+            selectedVisit = newSelectedVisit;
+        }
+
+        function updateSelectedType(newSelectedType) {
+            selectedType = newSelectedType;
+        }
+
+        function populateVisitMenu() {
+            var visitList = $('#visit').empty();
+            var currentProject = $(document.getElementById('$projectLocation')).val();
+            var currentSubject = $(document.getElementById('$subjectLocation')).val();
+            #if ($!project)
+                if (!currentProject) {currentProject = "$!project"};
+            #end
+            #if ($!part_id)
+                if (!currentSubject || currentSubject == '(Select a project)') {currentSubject = "$!part_id"};
+            #elseif ($!subject.getId())
+                if (!currentSubject || currentSubject == '(Select a project)') {currentSubject = "$!subject.getId()"};
+            #elseif ($!subject)
+                if (!currentSubject || currentSubject == '(Select a project)') {currentSubject = "$!subject"};
+            #end
+            if (currentProject && currentSubject) {
+                #if ($!item.getXSIType())
+                    var typeClause = '&type=$item.getXSIType()&subtype='+selectedType;
+                #else
+                    var typeClause = '';
+                #end
+                var getOpenVisitUrl = '$content.getURI('')/data/projects/' + currentProject + '/subjects/' + currentSubject + '/visits?open=true' + typeClause;
+                YAHOO.util.Connect.asyncRequest('GET', getOpenVisitUrl, {
+                    success: function (o) {
+                        try {
+                            var selector = $(".visitSubtypeSelector");
+                            var openVisitList = JSON.parse(o.responseText);
+                            if (openVisitList.length > 0) {
+                                visitList.append('<option value="">SELECT</option>');
+                                $(openVisitList).each(function(i, el){
+                                    var selected = '';
+                                    if (el.visit.id == selectedVisit) {
+                                        selected = '" selected="true';
+                                    }
+                                    visitList.append('<option value="'+el.id+selected+'">'+el.name+" "+e1.type+'</option>');
+                                });
+                                selector.show();
+                            }
+                            else if (openVisitResult.ResultSet.protocolName) {
+                                visitList.append('<option value="">NO OPEN VISITS');
+                                selector.show();
+                            }
+                            else {
+                                selector.hide();
+                            }
+                        } catch (e) {
+                        }
+                    },
+                    failure: function (o) {
+                    },
+                    argument: this
+                });
+            }
+        }
+    }
+
+    window.visitSelector = new VisitSelector();
+    window.visitSelector.init();
+</script>

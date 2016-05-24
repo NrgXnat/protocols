@@ -1,0 +1,9 @@
+<tr>
+    <th>Visit</th>
+    <td><input id="$!item.getXSIType()/visit" name="$!item.getXSIType()/visit" type="text"></td>
+</tr>
+<tr>
+    <th>Subtype</th>
+    <td><input id="$!item.getXSIType()/protocol" name="$!item.getXSIType()/protocol" type="text"></td>
+
+</tr>

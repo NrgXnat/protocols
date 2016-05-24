@@ -1,0 +1,69 @@
+<TR class="assessorRow">
+    <TD class="assessorRowDate">$!unsortedExperiment.getExperiment().getDate()</TD>
+    <TD class="assessorRowName">
+        #set ($unsortedExperimentID = $!unsortedExperiment.getExperiment().getId())
+        #set ($unsortedExperimentField = "${unsortedExperiment.getType()}.ID")
+        #set ($url = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$unsortedExperiment.getType()).addPathInfo('search_field',$unsortedExperimentField).addPathInfo('search_value',$unsortedExperimentID).addPathInfo('popup',$popup)" )
+        #if ($!unsortedExperiment.getExperiment().hasProject($project))
+            #set ( $url= "$url/project/$project")
+        #end
+        #if ($!unsortedExperiment.getExperiment().canRead($user))
+            <a href="$url" title="$!unsortedExperiment.getExperiment().getIdentifier($!project)">$user.getDisplayManager().getDisplayNameForElement($unsortedExperiment.getType())</A>
+        #else
+            <a title="$!unsortedExperiment.getExperiment().getIdentifier($!project)" class="plainText">$user.getDisplayManager().getDisplayNameForElement($unsortedExperiment.getType())</A>
+        #end
+    </TD>
+    <TD class="assessorRowLabel">
+        #if ($!unsortedExperiment.getExperiment().getIdentifier($project,true))
+                                        $!unsortedExperiment.getExperiment().getIdentifier($project,true)
+                                        #elseif($!unsortedExperiment.getExperiment().getLabel())
+            $!unsortedExperiment.getExperiment().getLabel()
+        #else
+            $!unsortedExperiment.getExperiment().getId()
+        #end
+    </TD>
+    <TD class="assessorRowSubtype">$!unsortedExperiment.getSubtype()</TD>
+    <TD class="assessorRowActions">
+        #if ($user.canEdit("${unsortedExperiment.getType()}/project", $project))
+            #if ($unsortedExperiment.validVisits.size() == 0)
+                Create a Visit Below
+            #else
+                <SELECT id="frank" onChange="addToVisit(this.options[this.selectedIndex].value, '$!unsortedExperiment.getExperiment().getId()', this)">
+                    <OPTION name="add" value="-1">visit</OPTION>
+                    #foreach ($validVisit in $unsortedExperiment.getValidVisits())
+                        <OPTION name="$validVisit.getName()" value="$validVisit.getId()">$validVisit.getName() $!validVisit.getType()</OPTION>
+                    #end
+                </SELECT>
+            #end
+        #end
+    </TD>
+</TR>
+#foreach($assessor in $unsortedExperiment.getAssessors())
+    <TR class="assessorRow">
+        <TD class="assessorRowDate">$!assessor.getAssessor().getDate()</TD>
+        <TD class="assessorRowName">
+            #set ($assessorID = $!assessor.getAssessor().getId())
+            #set ($assessorField = "${assessor.getType()}.ID")
+            #set ($url = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$assessor.getType()).addPathInfo('search_field',$assessorField).addPathInfo('search_value',$assessorID).addPathInfo('popup',$popup)" )
+            #if($!assessor.getAssessor().hasProject($project))
+                #set ( $url= "$url/project/$project")
+            #end
+            #if($!assessor.getAssessor().canRead($user))
+                &#8226;&nbsp;&nbsp;<a href="$url">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+            #else
+                &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+            #end
+        </TD>
+        <TD class="assessorRowLabel">
+            #if ($!assessor.getAssessor().getIdentifier($project,true))
+                                            $!assessor.getAssessor().getIdentifier($project,true)
+                                            #elseif($!assessor.getAssessor().getLabel())
+                $!assessor.getAssessor().getLabel()
+            #else
+                $!assessor.getAssessor().getId()
+            #end
+        </TD>
+        <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
+        <TD class="assessorRowActions"></TD>
+    </TR>
+#end
