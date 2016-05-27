@@ -109,7 +109,7 @@ public class VisitResource extends AbstractProtocolResource{
 		}
 
         if (project != null) {
-            protocol = _projectProtocolService.getProtocolForProject(project.getId(), user);
+            protocol = getProjectProtocolService().getProtocolForProject(project.getId(), user);
         }
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);

@@ -87,7 +87,7 @@ public class VisitReportResource extends AbstractProtocolResource {
             if (project == null) {
                 return new StringRepresentation("{\"error\":\"The project ID "+projectId+" does not exist or you do not have access to it.\"}", MediaType.APPLICATION_JSON);
             }
-            Protocol protocol = _projectProtocolService.getProtocolForProject(projectId, user);
+            Protocol protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
             if (protocol == null) {
                 return new StringRepresentation("{\"error\":\"No protocol is associated with project ID: "+projectId+"\"}", MediaType.APPLICATION_JSON);
             }

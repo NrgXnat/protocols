@@ -21,24 +21,44 @@ import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
 
-import javax.inject.Inject;
-
 public abstract class AbstractProtocolResource extends SecureResource {
+
+    protected ProtocolService protocolService = null;
+    protected ProjectProtocolService projectProtocolService = null;
+    protected ProtocolExceptionService protocolExceptionService = null;
+    protected ProtocolLineageService protocolLineageService = null;
+
     protected final ObjectMapper mapper = new ObjectMapper();
 
     public AbstractProtocolResource(Context context, Request request, Response response) {
         super(context, request, response);
     }
 
-    @Inject
-    protected ProtocolService _protocolService;
+    protected ProtocolService getProtocolService() {
+        if (protocolService == null) {
+            protocolService = XDAT.getContextService().getBean(ProtocolService.class);
+        }
+        return protocolService;
+    }
 
-    @Inject
-    protected ProjectProtocolService _projectProtocolService;
+    protected ProjectProtocolService getProjectProtocolService() {
+        if (projectProtocolService == null) {
+            projectProtocolService = XDAT.getContextService().getBean(ProjectProtocolService.class);
+        }
+        return projectProtocolService;
+    }
 
-    @Inject
-    protected ProtocolExceptionService _protocolExceptionService;
+    protected ProtocolExceptionService getProtocolExceptionService() {
+        if (protocolExceptionService == null) {
+            protocolExceptionService = XDAT.getContextService().getBean(ProtocolExceptionService.class);
+        }
+        return protocolExceptionService;
+    }
 
-    @Inject
-    protected ProtocolLineageService _protocolLineageService;
+    protected ProtocolLineageService getProtocolLineageService() {
+        if (protocolLineageService == null) {
+            protocolLineageService = XDAT.getContextService().getBean(ProtocolLineageService.class);
+        }
+        return protocolLineageService;
+    }
 }

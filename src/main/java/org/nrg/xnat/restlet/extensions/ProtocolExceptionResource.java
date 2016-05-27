@@ -60,7 +60,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
             return;
         }
 
-        protocol = _projectProtocolService.getProtocolForProject(projectId, user);
+        protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             getResponse().setEntity("Project " + projectId + " does not have a protocol associated with it.", MediaType.TEXT_PLAIN);
@@ -140,7 +140,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
             protocolException.set_explanation(explanation);
         }
 
-        _protocolExceptionService.create(protocolException);
+        getProtocolExceptionService().create(protocolException);
     }
 
     @Override
@@ -171,9 +171,9 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
                 return;
             }
 
-            ProtocolException ex = _protocolExceptionService.findExceptionForVisitAndType(visit.getId(), xsiType, subtype);
+            ProtocolException ex = getProtocolExceptionService().findExceptionForVisitAndType(visit.getId(), xsiType, subtype);
             if (ex != null) {
-                _protocolExceptionService.delete(ex);
+                getProtocolExceptionService().delete(ex);
                 getResponse().setStatus(Status.SUCCESS_OK);
             }
             else {
@@ -187,12 +187,12 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
     public Representation represent(Variant variant) throws ResourceException {
         try {
             if (StringUtils.isEmpty(xsiType)) {
-                List<ProtocolException> list = _protocolExceptionService.findExceptionsForVisit(visit.getId());
+                List<ProtocolException> list = getProtocolExceptionService().findExceptionsForVisit(visit.getId());
                 String listJSON = mapper.writeValueAsString(list);
                 return new StringRepresentation(listJSON, MediaType.APPLICATION_JSON);
             }
             else {
-                ProtocolException ex = _protocolExceptionService.findExceptionForVisitAndType(visit.getId(), xsiType, subtype);
+                ProtocolException ex = getProtocolExceptionService().findExceptionForVisitAndType(visit.getId(), xsiType, subtype);
                 if (ex != null) {
                     String exceptionJSON = mapper.writeValueAsString(ex);
                     return new StringRepresentation(exceptionJSON, MediaType.APPLICATION_JSON);

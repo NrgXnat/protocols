@@ -71,7 +71,7 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
             getResponse().setEntity("You do not have permissions to modify protocols associations with this project.", MediaType.TEXT_PLAIN);
             return;
         }
-        _projectProtocolService.removeProtocolFromProject(projectId, user);
+        getProjectProtocolService().removeProtocolFromProject(projectId, user);
         getResponse().setStatus(Status.SUCCESS_OK);
     }
 
@@ -103,12 +103,12 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
             catch (Exception ignored) {} // almost certainly just a NumberFormatException
 
             if (version != null) {
-                protocol = _protocolService.getProtocolByIdAndVersion(protocolId, version);
+                protocol = getProtocolService().getProtocolByIdAndVersion(protocolId, version);
             }
             else {
-                protocol = _protocolService.getProtocolById(protocolId);
+                protocol = getProtocolService().getProtocolById(protocolId);
             }
-            _projectProtocolService.assignProtocolToProject(project, protocol, user);
+            getProjectProtocolService().assignProtocolToProject(project, protocol, user);
             getResponse().setStatus(Status.SUCCESS_OK);
 
             //DELETE storedSearches
@@ -124,7 +124,7 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
 
             try {
                 ProtocolWrapper wrapper = new ProtocolWrapper(protocol);
-                wrapper.setMaxVersion(_protocolService.getMaxProtocolVersion(protocolId));
+                wrapper.setMaxVersion(getProtocolService().getMaxProtocolVersion(protocolId));
                 String protocolJson = mapper.writeValueAsString(wrapper);
                 getResponse().setEntity(protocolJson, MediaType.APPLICATION_JSON);
             } catch (IOException ignored) {}
@@ -152,10 +152,10 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
         catch (Exception ignored) {} // almost certainly just a NumberFormatException
 
         if (version != null) {
-            protocol = _projectProtocolService.getPreviousProtocolForProject(projectId, version, user);
+            protocol = getProjectProtocolService().getPreviousProtocolForProject(projectId, version, user);
         }
         else {
-            protocol = _projectProtocolService.getProtocolForProject(projectId, user);
+            protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
         }
 
         if (protocol == null) {
@@ -164,7 +164,7 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
 
         try {
             ProtocolWrapper wrapper = new ProtocolWrapper(protocol);
-            wrapper.setMaxVersion(_protocolService.getMaxProtocolVersion(protocol.getProtocolId()));
+            wrapper.setMaxVersion(getProtocolService().getMaxProtocolVersion(protocol.getProtocolId()));
             String protocolJson = mapper.writeValueAsString(wrapper);
             return new StringRepresentation(protocolJson, MediaType.APPLICATION_JSON);
         } catch (IOException e) {

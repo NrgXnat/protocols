@@ -12,7 +12,6 @@ package org.nrg.xnat.restlet.extensions;/*
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nrg.xdat.security.helpers.Roles;
-import org.nrg.xft.security.UserI;
 import org.nrg.xnat.protocol.entities.ProjectProtocol;
 import org.nrg.xnat.protocol.entities.Protocol;
 import org.nrg.xnat.protocol.entities.ProtocolLineage;
@@ -61,12 +60,12 @@ public class ProtocolResource extends AbstractProtocolResource {
     @Override
     public void handleDelete() {
         // check to make sure user is on the white list for the protocol
-        Protocol protocol = _protocolService.getProtocolById(protocolId);
+        Protocol protocol = getProtocolService().getProtocolById(protocolId);
         if (protocol == null || (!Roles.isSiteAdmin(user) && !protocol.getUserWhiteList().contains(user.getUsername()))) {
             getResponse().setStatus(Status.CLIENT_ERROR_FORBIDDEN);
             return;
         }
-        _protocolService.deleteProtocol(protocolId);
+        getProtocolService().deleteProtocol(protocolId);
         getResponse().setStatus(Status.SUCCESS_OK);
     }
 
@@ -97,13 +96,11 @@ public class ProtocolResource extends AbstractProtocolResource {
             final InputStream is = fw.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             StringBuilder sb = new StringBuilder();
-
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\n");
             }
             is.close();
-
             String contents = sb.toString();
 
             //validate the contents (the protocol string)
@@ -126,7 +123,7 @@ public class ProtocolResource extends AbstractProtocolResource {
 
                 ProtocolLineage theLineage = null;
                 if (protocolId != null) {
-                    existing = _protocolService.getProtocolById(protocolId);
+                    existing = getProtocolService().getProtocolById(protocolId);
                     if (existing != null) {
                         theLineage = existing.getProtocolLineage();
                     }
@@ -142,19 +139,19 @@ public class ProtocolResource extends AbstractProtocolResource {
                     // check to see if the lineage needs to be updated
                     if (!theLineage.equals(theProtocol.getProtocolLineage())) {
                         theLineage.setUserWhiteList(theProtocol.getUserWhiteList());
-                        _protocolLineageService.update(theLineage);
+                        getProtocolLineageService().update(theLineage);
                     }
                     if (!theProtocol.equals(existing)) {
                         theProtocol.setProtocolLineage(theLineage);
                         theProtocol.setVersion(theLineage.getProtocols().size() + 1);
                         theProtocol.cleanChildIds();
-                        theProtocol = _protocolService.storeProtocol(theProtocol, user);
+                        theProtocol = getProtocolService().storeProtocol(theProtocol, user);
                     }
                 }
                 //protocol part of a new lineage
                 else {
                     // only users who are owners of at least one project should be able to create protocols
-                    Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) user.getAuthorities();
+                    Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>)user.getAuthorities();
                     boolean allowed =  Roles.isSiteAdmin(user); // site admins and owners of at least one project are allowed to create protocols
                     for (GrantedAuthority authority : authorities) {
                         if (allowed || authority.getAuthority().endsWith("_owner")) {
@@ -171,11 +168,11 @@ public class ProtocolResource extends AbstractProtocolResource {
 
                     theLineage = new ProtocolLineage();
                     theLineage.setUserWhiteList(theProtocol.getUserWhiteList());
-                    _protocolLineageService.create(theLineage);
+                    getProtocolLineageService().create(theLineage);
 
                     theProtocol.setProtocolLineage(theLineage);
                     theProtocol.setVersion(1);
-                    theProtocol = _protocolService.storeProtocol(theProtocol, user);
+                    theProtocol = getProtocolService().storeProtocol(theProtocol, user);
                 }
                 ProtocolWrapper wrapper = new ProtocolWrapper(theProtocol);
                 wrapper.setMaxVersion(theProtocol.getVersion());
@@ -200,12 +197,12 @@ public class ProtocolResource extends AbstractProtocolResource {
             // the 'projectsUsing' flag should be set when retrieving the list of projects currently using some version of this protocol
             if (isQueryVariableTrueHelper(this.getQueryVariable("projectsUsing"))) {
                 // check to make sure user is on the white list for the protocol
-                Protocol protocol = _protocolService.getProtocolById(protocolId);
+                Protocol protocol = getProtocolService().getProtocolById(protocolId);
                 if (protocol == null || (!Roles.isSiteAdmin(user) && !protocol.getUserWhiteList().contains(user.getUsername()))) {
                     throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Could not locate protocol with id " + protocolId +".");
                 }
                 try {
-                    List<ProjectProtocol> projects = _protocolService.getProjectsUsingProtocol(protocolId, user);
+                    List<ProjectProtocol> projects = getProtocolService().getProjectsUsingProtocol(protocolId, user);
                     Collections.sort(projects);
                     String projectList = mapper.writeValueAsString(projects);
                     return new StringRepresentation(projectList, MediaType.APPLICATION_JSON);
@@ -224,10 +221,10 @@ public class ProtocolResource extends AbstractProtocolResource {
                 catch (Exception ignored) {} // almost certainly just a NumberFormatException
 
                 if (version != null) {
-                    protocol = _protocolService.getProtocolByIdAndVersion(protocolId, version);
+                    protocol = getProtocolService().getProtocolByIdAndVersion(protocolId, version);
                 }
                 else {
-                    protocol = _protocolService.getProtocolById(protocolId);
+                    protocol = getProtocolService().getProtocolById(protocolId);
                 }
 
                 if (protocol != null) {
@@ -236,7 +233,7 @@ public class ProtocolResource extends AbstractProtocolResource {
                             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Could not locate protocol with id " + protocolId +".");
                         }
                         ProtocolWrapper wrapper = new ProtocolWrapper(protocol);
-                        wrapper.setMaxVersion(_protocolService.getMaxProtocolVersion(protocolId));
+                        wrapper.setMaxVersion(getProtocolService().getMaxProtocolVersion(protocolId));
                         String forExport = this.getQueryVariable("export");
                         if("true".equals(forExport)){
                             // Remove the protocol ids to prevent re-importing this protocol over top of an existing one later
@@ -259,7 +256,7 @@ public class ProtocolResource extends AbstractProtocolResource {
         }
         else { // get a list of all protocols the user is white-listed on
             try {
-                List<Protocol> list = _protocolService.getAvailableProtocols(user);
+                List<Protocol> list = getProtocolService().getAvailableProtocols(user);
                 String protocols = mapper.writeValueAsString(list.toArray());
                 return new StringRepresentation(protocols, MediaType.APPLICATION_JSON);
             } catch (IOException e) {

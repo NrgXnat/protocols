@@ -49,7 +49,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
             return;
         }
 
-        protocol = _projectProtocolService.getProtocolForProject(projectId, user);
+        protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             response.setEntity("Project " + projectId + " does not have a protocol associated with it.", MediaType.TEXT_PLAIN);
