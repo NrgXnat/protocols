@@ -79,9 +79,7 @@ public class ProtocolResource extends AbstractProtocolResource {
     public void handlePost() {
         try {
             FileWriterWrapperI fw;
-// TODO: fix this file uploader thing but disabling it just to get crap to compile for the moment
-
-/*            List<FileWriterWrapperI> fws = this.getFileWriters();
+            List<FileWriterWrapperI> fws = this.getFileWriters();
             if (fws.size() == 0) {
                 this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
                 getResponse().setEntity("Unable to identify upload format.", MediaType.TEXT_PLAIN);
@@ -105,9 +103,8 @@ public class ProtocolResource extends AbstractProtocolResource {
                 sb.append(line).append("\n");
             }
             is.close();
-*/
-            String contents = "";
-//            String contents = sb.toString();
+
+            String contents = sb.toString();
 
             //validate the contents (the protocol string)
             Protocol theProtocol;

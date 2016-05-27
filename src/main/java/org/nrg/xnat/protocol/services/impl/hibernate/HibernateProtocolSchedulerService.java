@@ -2,9 +2,11 @@ package org.nrg.xnat.protocol.services.impl.hibernate;
 
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
+import org.nrg.mail.services.MailService;
 import org.nrg.xdat.XDAT;
 import org.nrg.xdat.om.XnatProjectdata;
 import org.nrg.xdat.om.XnatPvisitdata;
+import org.nrg.xdat.preferences.SiteConfigPreferences;
 import org.nrg.xdat.security.XDATUser;
 import org.nrg.xdat.turbine.utils.AdminUtils;
 import org.nrg.xft.security.UserI;
@@ -16,6 +18,8 @@ import org.nrg.xnat.protocol.util.VisitReportInfo;
 import org.nrg.xnat.restlet.extensions.VisitReportResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -184,24 +188,22 @@ public class HibernateProtocolSchedulerService implements ProtocolSchedulerServi
     }
 
     private void sendEmail(String address, String subject, String body){
-System.out.println("would send an email from here");
-//        try {
-//TODO: fix this compile error
-//            C:\NRG\plugins\protocols-plugin\src\main\java\org\nrg\xnat\protocol\services\impl\hibernate\HibernateProtocolSchedulerService.java:188: error: cannot access Initializable
-//            XDAT.getMailService().sendHtmlMessage(XDAT.getSiteConfigPreferences().getAdminEmail(), address, subject, body);
-//            ^
-//            class file for org.apache.stratum.lifecycle.Initializable not found
-//            C:\NRG\plugins\protocols-plugin\src\main\java\org\nrg\xnat\protocol\services\impl\hibernate\HibernateProtocolSchedulerService.java:188: error: cannot access Configurable
-//            XDAT.getMailService().sendHtmlMessage(XDAT.getSiteConfigPreferences().getAdminEmail(), address, subject, body);
-
-//            XDAT.getMailService().sendHtmlMessage(XDAT.getSiteConfigPreferences().getAdminEmail(), address, subject, body);
-//        } catch (MessagingException e) {
-//            _log.error("",e);
-//        }
+        try {
+            _mailService.sendHtmlMessage(_preferences.getAdminEmail(), address, subject, body);
+        } catch (MessagingException e) {
+            _log.error("",e);
+        }
     }
 
     private static final Logger _log = LoggerFactory.getLogger(HibernateProtocolSchedulerService.class);
 
     @Inject
     private ProjectProtocolService _projectProtocolService;
+
+    @Inject
+    private MailService _mailService;
+
+    @Autowired
+    @Lazy
+    private SiteConfigPreferences _preferences;
 }

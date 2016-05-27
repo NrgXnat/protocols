@@ -11,20 +11,18 @@ import org.nrg.xdat.turbine.modules.screens.SecureReport;
 import org.nrg.xdat.turbine.utils.TurbineUtils;
 import org.nrg.xft.exception.ElementNotFoundException;
 import org.nrg.xft.schema.Wrappers.GenericWrapper.GenericWrapperElement;
-import org.nrg.xnat.modules.ModuleMetadata;
-import org.nrg.xnat.modules.Registry;
 import org.nrg.xnat.protocol.util.SubjectVisitInfo;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class ProtocolHelper extends SecureReport {
+/*
     @Inject
     private Registry _registry;
 
     final ModuleMetadata protocolsMetadata = _registry.getModule("protocols");
-
+*/
     @Override
     public void finalProcessing(RunData data, Context context) {
         try {
@@ -49,17 +47,16 @@ public class ProtocolHelper extends SecureReport {
             logger.error("", e);
         }
     }
-
+/*
     public void setupModuleMetaData(RunData data, Context context) throws Exception {
         context.put("protocolsModule", protocolsMetadata);
     }
-
+*/
     public static void setupDataTypes(RunData data, Context context) throws Exception {
         ArrayList<TypeOption> prioritizedDataTypes = new ArrayList<>();
         ArrayList<TypeOption> dataTypes = new ArrayList<>();
         ArrayList<TypeOption> assessorTypes = new ArrayList<>();
-// TODO: THIS IS SO BROKEN BUT Trying to get shit to compile!
-/*        ArrayList<ElementDisplay> elementDisplays = (ArrayList<ElementDisplay>) UserHelper.getUserHelperService(XDAT.getUserDetails()).getBrowseableCreateableElementDisplays();
+        ArrayList<ElementDisplay> elementDisplays = (ArrayList<ElementDisplay>) UserHelper.getUserHelperService(XDAT.getUserDetails()).getBrowseableCreateableElementDisplays();
         String [] imageExpPriority = {"xnat:petMrSessionData", "xnat:mrSessionData", "xnat:petSessionData"};              // prioritizes the image session sort order on the experiments table and in dropdowns
         TypeOption [] priorityDataTypes = new TypeOption [imageExpPriority.length];
         for (ElementDisplay ed : elementDisplays) {
@@ -93,7 +90,6 @@ public class ProtocolHelper extends SecureReport {
         context.put("dataTypeOptions", prioritizedDataTypes);
         context.put("assessorTypeOptions", assessorTypes);
         context.put("user",TurbineUtils.getUser(data));
-*/
     }
 
     public static class TypeOption implements Comparable<TypeOption> {

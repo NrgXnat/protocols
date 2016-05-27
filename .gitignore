@@ -5,3 +5,4 @@ src/beans/
 /target
 /build
 /.gradle
+_*.bat

@@ -28,6 +28,19 @@ public class ManageProtocol extends SecureScreen {
     protected void doBuildTemplate(RunData data, Context context) throws Exception {
         context.put("user",TurbineUtils.getUser(data));
         // For 1.7 and above the module registry feature should exist and we shouldn't need to do this for one specific page like below
-        new ProtocolHelper().setupModuleMetaData(data, context);
+//        new ProtocolHelper().setupModuleMetaData(data, context);
+
+
+        /*
+
+        $data.getSession().getAttribute("user").isSiteAdmin())
+        #if (!$canManageProtocols)
+            #foreach($authority in $data.getSession().getAttribute("user").getAuthorities())
+
+                authority: $authority
+
+                #if ($authority.getAuthority().endsWith("_owner"))
+
+         */
     }
 }

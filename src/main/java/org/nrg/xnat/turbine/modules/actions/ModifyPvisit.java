@@ -108,14 +108,7 @@ public class ModifyPvisit extends SecureAction {
 
         if (error!=null)
         {
-//            data.addMessage(error.getMessage());
-//TODO: fix this compile error
-//            C:\NRG\plugins\protocols-plugin\src\main\java\org\nrg\xnat\turbine\modules\actions\ModifyPvisit.java:110: error: cannot access Element
-//            data.addMessage(error.getMessage());
-//            ^
-//            class file for org.apache.ecs.Element not found
-//            Note: Some input files use or override a deprecated API.
-
+            data.addMessage(error.getMessage());
             TurbineUtils.SetEditItem(item, data);
             data.setScreenTemplate("XDATScreen_edit_xnat_pVisitData.vm");
             return;

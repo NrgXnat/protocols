@@ -227,9 +227,7 @@ dependencies {
         exclude group: '*'
     }
     compile "org.nrg.xdat:tasks:${vXnat}"
-    compile("org.nrg.xdat:core:${vXnat}") {
-        exclude group: '*'
-    }
+    compile("org.nrg.xdat:core:${vXnat}")
     compile("org.nrg:framework:${vXnat}") {
         exclude group: '*'
     }

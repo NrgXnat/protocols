@@ -6,14 +6,25 @@
     <ul>
         #addGlobalCustomScreens("topBar/Tools")
 
+        user: $user
+        user.isSiteAdmin(): $user.isSiteAdmin()
+
         #set ($canManageProtocols = $data.getSession().getAttribute("user").isSiteAdmin())
         #if (!$canManageProtocols)
             #foreach($authority in $data.getSession().getAttribute("user").getAuthorities())
+
+                authority: $authority
+
                 #if ($authority.getAuthority().endsWith("_owner"))
                     #set ($canManageProtocols = true)
                 #end
             #end
         #end
+
+        canManageProtocols: $canManageProtocols
+
+
+
         #if ($canManageProtocols)
             <li><a href="$content.getURI("app/template/ManageProtocol.vm")">Manage Protocols</a></li>
         #end
