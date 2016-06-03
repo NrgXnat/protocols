@@ -23,8 +23,8 @@ XNAT.data.page.subject = { visits: $jsonVisits, unexpectedVisits: $jsonUnexpecte
 </script>
 
 <div id="visitController" ng-controller="SubjectVisitController" class="ng-cloak">
-#parse($turbineUtils.getTemplateName("_assessors_protocolAware","xnat:subjectData",$project))
-#parse($turbineUtils.getTemplateName("_visits","xnat:subjectData",$project))
+#parse("screens/xnat_subjectData/xnat_subjectData_assessors_protocolAware.vm")
+#parse("screens/xnat_subjectData/xnat_subjectData_visits.vm")
 </div>
 
 #elseif($!MissingDataType)

@@ -1,4 +1,5 @@
 #set($match=false)
+console.log("bundles: $bundles");
 #foreach($bundle in $bundles)
     #if($bundle.getBriefDescription().startsWith("Visit: "))
     	#set($match=true)

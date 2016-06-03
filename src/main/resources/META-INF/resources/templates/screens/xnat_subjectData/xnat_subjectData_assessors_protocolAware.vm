@@ -4,7 +4,7 @@
 		<button class="toolbar" ng-click="viewExperimentsList=false;"><span class="icon icon-sm icon-event"></span> {{labels.visits.viewProtocolSchedule}}</button>
 	</div>
 	<hr class="toolbar">
-	#parse($turbineUtils.getTemplateName("_assessors","xnat:subjectData",$project))
+	#parse("screens/xnat_subjectData/xnat_subjectData_assessors.vm")
 </div>
 <div ng-hide="viewExperimentsList">
 	<h4 title="{{protocol.name}}">Protocol Schedule</h4>
@@ -51,7 +51,7 @@
 							<tbody>
 									#set ($showAction=true)
 									#foreach ($unsortedExperiment in $SubjectVisitInfo.getUnsortedExperiments())
-											#parse($turbineUtils.getTemplateName("_unsortedExperiment","xnat:subjectData",$project))
+											#parse("screens/xnat_subjectData/xnat_subjectData_unsortedExperiment.vm")
 									#end
 							</tbody>
 					</table>
