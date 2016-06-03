@@ -15,8 +15,9 @@ button.toolbar{
   font-size: 8pt;
   font-weight: bold;
   color: #888888 !important;
-	border-radius: 6px !important;
-	padding-left: 6px !important;
+  border-radius: 6px !important;
+  padding-left: 6px !important;
+  box-shadow: none !important;
 }
 button.toolbar:hover{
   background-color: #ebebeb !important;
@@ -51,7 +52,7 @@ hr.toolbar{
 }
 
 .protocol-options-header {
-	background: url('images/nav_bkgd.png') center center repeat-x;
+	background: url('../images/nav_bkgd.png') center center repeat-x;
 	font-size: 8pt;
   font-weight: bold;
   padding: 2px;
@@ -106,7 +107,7 @@ div.add-new-help-bubble{
 	background-color: #eee;
 	padding: 10px;
 	z-index: 9999999999;
-};
+}
 .visible-bubble{
 	opacity: 1;
 }
@@ -131,7 +132,7 @@ th.vtex-corner-cell{
 	border-left: none;
 	background-color: #fff;
 	padding: 5px;
-	font-weight: none;
+	font-weight: lighter;
 }
 tr.vtex-header-row,
 tr.vtex-footer-row{
@@ -163,7 +164,7 @@ div.vtex-visit-name{
 }
 div.vtex-visit-description{
 	font-size: 7pt;
-	font-weight: none;
+	font-weight: lighter;
 }
 
 tr.vtex-header-row td.select-all-cell,
@@ -228,7 +229,7 @@ th div.vtex-visit-modification-buttons{
 	float: right;
 	cursor: pointer;
 	position: relative;
-	margin-top: -59px;
+	margin-top: -61px;
 	left: 7px;
 	border: 1px solid #888;
 	border-top-left-radius: 4px;
@@ -240,11 +241,19 @@ th div.vtex-visit-modification-buttons{
 }
 
 th.vtex-visit-row-header:hover div.vtex-visit-modification-buttons{
-	display: block;
+  display: block;
 }
 
 #layout_content{
-  max-width: 960px;
+  /* max-width: 960px; */
+}
+#page_wrapper{
+  overflow: hidden;
+}
+#xnat_power{
+  top: 55px;
+  clear: both;
+  padding-right: 20px;
 }
 /*
 .grayBorder{

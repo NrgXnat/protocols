@@ -162,7 +162,7 @@ function initializeContent(s, $sce){
 	};
 	s.dialog.editProtocolSettings = {
 		src: XNAT.url.buildUrl('scripts/protocols/templates/editProtocolSettings.html'),
-		height: 310,
+		height: 330,
 		width: 400,
 		buttons: {
 			okay: {
@@ -177,7 +177,7 @@ function initializeContent(s, $sce){
 		}				
 	};
 	s.dialog.editProtocolUsers = {
-		height: 400,
+		height: 420,
 		width: 600,
 		labels: {
 			title: "Users",
@@ -193,7 +193,7 @@ function initializeContent(s, $sce){
 		}				
 	};
 	s.dialog.viewProtocolProjects = {
-		height: 400,
+		height: 450,
 		width: 600,
 		labels: {
 			title: "View Projects",
@@ -238,7 +238,7 @@ function initializeContent(s, $sce){
 		}				
 	};
 	s.dialog.editExperiment = {
-		height: 325,
+		height: 345,
 		width: 650,
 		buttons: {
 			okay: {
@@ -268,7 +268,7 @@ function initializeContent(s, $sce){
 		}				
 	};
 	s.dialog.editVisitType = {
-		height: 445,
+		height: 465,
 		width: 730,
 		buttons: {
 			okay: {
@@ -516,7 +516,7 @@ function initializeContent(s, $sce){
 		},
 		deleteExperiment: {
 			id: "deleteExperiment",
-			height: 190,
+			height: 210,
 			width: 330,
 			labels: {
 				title: "Delete "+s.labels.experiment+"?",

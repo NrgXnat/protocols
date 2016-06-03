@@ -41,7 +41,7 @@
 		</div>
 		<br>
 		<div ng-hide="visitTypeExperimentContent">
-			<button id="firstVisitButton" ng-click="addVisit($event)" class="first-visit">{{labels.addFirstVisit}}&nbsp;&#x25B6;</button>
+			<button id="firstVisitButton" ng-click="addVisit($event)" class="first-visit">{{labels.addFirstVisit}}&nbsp;<span style="font-size: larger">&#x25B6;</span></button>
 			<br><br>
 			<div ng-class="addNewVisitBubble" class="add-new-help-bubble hidden-bubble withfade" ng-bind-html="labels.addNewVisitBubble"></div>
 		</div>
@@ -54,7 +54,7 @@
 	<br/>
 	<div style="float: right;">
 		<a id="exportFiles" href="#"></a>
-		<button ng-click="printToConsole()">Print to Console</button>
+		<!-- button ng-click="printToConsole()">Print to Console</button -->
 		<button id="deleteProtocolButton" ng-click="deleteProtocol()" ng-hide="newProtocol">{{labels.deleteProtocol}}</button>
 		<button id="exportProtocolButton" ng-click="exportProtocol()" ng-hide="newProtocol">{{labels.exportProtocol}}</button>
 		<button id="updateProtocolButton" ng-click="updateProtocol()">{{labels.updateProtocol.action}}</button>
