@@ -1,6 +1,9 @@
-# Visits & Protocls Plugin for XNAT 1.7 #
+# Visits & Protocols Plugin for XNAT 1.7 #
 
 This is a fork of the Visits & Protocols module for XNAT 1.6.5 implemented as an XNAT 1.7 plugin.
+
+Some documentation in the form of a presentation I'm giving at the XNAT Workshop 2016:
+https://docs.google.com/presentation/d/1Vkc3hSc76spnuYlXJcaNimP1r-_0MKeWIIrsKpbnGc8/edit?usp=sharing
 
 # Building #
 
