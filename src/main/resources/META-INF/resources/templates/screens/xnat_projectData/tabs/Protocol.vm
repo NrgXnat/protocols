@@ -243,6 +243,10 @@ function handleProtocolError(err) {
 </script>
 #else
 You are not authorized to manage the protocol association for this project.
+<script type="text/javascript">
+  $("em:contains('Protocol')").parent().parent().remove();
+  $("p:contains('not authorized to manage the protocol association')").remove();
+</script>
 #end
 
 <link rel='stylesheet' href='$content.getURI("style/protocols.css")' />
