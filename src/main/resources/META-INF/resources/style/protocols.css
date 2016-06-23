@@ -244,9 +244,6 @@ th.vtex-visit-row-header:hover div.vtex-visit-modification-buttons{
   display: block;
 }
 
-#layout_content{
-  /* max-width: 960px; */
-}
 #page_wrapper{
   overflow: hidden;
 }
@@ -853,7 +850,7 @@ tbody#dataRows td.x_rs_td{
 ***************************/
 
 #layout_content {
-    padding-top: 0px;
+    padding: 0px;
 }
 
 #visitWrapper {

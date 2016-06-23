@@ -26,8 +26,6 @@ public class ManageProtocol extends SecureScreen {
     public final static Logger logger = Logger.getLogger(ManageProtocol.class);
     @Override
     protected void doBuildTemplate(RunData data, Context context) throws Exception {
-        context.put("user",TurbineUtils.getUser(data));
-        // For 1.7 and above the module registry feature should exist and we shouldn't need to do this for one specific page like below
-//        new ProtocolHelper().setupModuleMetaData(data, context);
+//        context.put("user",TurbineUtils.getUser(data));
     }
 }

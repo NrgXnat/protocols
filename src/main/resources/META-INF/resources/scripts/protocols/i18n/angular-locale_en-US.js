@@ -371,6 +371,7 @@ function initializeContent(s, $sce){
 	};
 	s.dialog.preexisitingOpenVisits = {
 		width: 415,
+		height: 200,
 		labels: {
 			title: "Multiple open visits not allowed",
 			description: $sce.trustAsHtml("Multiple open visits are not allowed by the project protocol.<br><br>You must close any open visits before opening this visit.")
@@ -384,7 +385,7 @@ function initializeContent(s, $sce){
 		}
 	};
 	s.dialog.openVisit = {
-		height: 350,
+		height: 355,
 		width: 500,
 		buttons: {
 			okay: {
@@ -416,7 +417,7 @@ function initializeContent(s, $sce){
 	};
 	s.dialog.editVisit = {
 		id: "openVisit",
-		height: 350,
+		height: 355,
 		width: 500,
 		buttons: {
 			okay: {

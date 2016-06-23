@@ -23,7 +23,7 @@ YAHOO.util.Event.onDOMReady( function() {
 				$('<div id="visitApp" ng-app="subjectVisits"></div>').insertBefore('#assessor_tabs');
         $("#visitApp").html(oResponse.responseText);
 				$('#assessor_tabs').hide();  // Removing this instead of hiding it also removes all DOM elements defined further down on the page
-				angular.bootstrap(document, ['subjectVisits']);
+				setTimeout(function(){ angular.bootstrap(document, ['subjectVisits']); }, 500);
       } else {
 				$("#hideAssessors").show();
         XNAT.app.assessor_tabs.assessor_tab_summary.removeTab(XNAT.app.assessor_tabs.assessor_tab_summary.getTab(0));

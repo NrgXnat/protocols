@@ -9,7 +9,7 @@
 <div ng-hide="viewExperimentsList">
 	<h4 title="{{protocol.name}}">Protocol Schedule</h4>
 	<div class="protocolToolbar">
-##if ($nextVisits > 0 && $user.canEdit("xnat:pVisitData/project", $project) && ($SubjectVisitInfo.getProtocol().getAllowMultipleOpenVisits() || !$SubjectVisitInfo.getHasOpenVisit()))
+##if ($nextVisits > 0 && $data.getSession().getAttribute("userHelper").canEdit("xnat:pVisitData/project", $project) && ($SubjectVisitInfo.getProtocol().getAllowMultipleOpenVisits() || !$SubjectVisitInfo.getHasOpenVisit()))
 
 ##set ($visitlink = $link.setAction("CreateExperiment").addPathInfo("data_type","xnat:pVisitData").addPathInfo("subject_id","$subject.getId()").addPathInfo("project","$project").toString())
 

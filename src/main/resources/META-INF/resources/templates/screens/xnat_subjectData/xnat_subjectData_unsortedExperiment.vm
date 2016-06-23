@@ -8,9 +8,9 @@
             #set ( $url= "$url/project/$project")
         #end
         #if ($!unsortedExperiment.getExperiment().canRead($user))
-            <a href="$url" title="$!unsortedExperiment.getExperiment().getIdentifier($!project)">$user.getDisplayManager().getDisplayNameForElement($unsortedExperiment.getType())</A>
+            <a href="$url" title="$!unsortedExperiment.getExperiment().getIdentifier($!project)">$displayManager.getSingularDisplayNameForElement($unsortedExperiment.getType())</A>
         #else
-            <a title="$!unsortedExperiment.getExperiment().getIdentifier($!project)" class="plainText">$user.getDisplayManager().getDisplayNameForElement($unsortedExperiment.getType())</A>
+            <a title="$!unsortedExperiment.getExperiment().getIdentifier($!project)" class="plainText">$displayManager.getSingularDisplayNameForElement($unsortedExperiment.getType())</A>
         #end
     </TD>
     <TD class="assessorRowLabel">
@@ -24,7 +24,7 @@
     </TD>
     <TD class="assessorRowSubtype">$!unsortedExperiment.getSubtype()</TD>
     <TD class="assessorRowActions">
-        #if ($user.canEdit("${unsortedExperiment.getType()}/project", $project))
+        #if ($data.getSession().getAttribute("userHelper").canEdit("${unsortedExperiment.getType()}/project", $project))
             #if ($unsortedExperiment.validVisits.size() == 0)
                 Create a Visit Below
             #else
@@ -49,9 +49,9 @@
                 #set ( $url= "$url/project/$project")
             #end
             #if($!assessor.getAssessor().canRead($user))
-                &#8226;&nbsp;&nbsp;<a href="$url">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                &#8226;&nbsp;&nbsp;<a href="$url">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
             #else
-                &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
             #end
         </TD>
         <TD class="assessorRowLabel">

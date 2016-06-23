@@ -24,6 +24,9 @@ public class ProtocolVisitSubjectHelper {
     //protected Map<XnatPvisitdata, List<ExperimentAssessorContainer>> visits = null;
 
     public static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ProtocolVisitSubjectHelper.class);
+    private static ProtocolService protocolService = null;
+    private static ProtocolExceptionService protocolExceptionService = null;
+    private static ProjectProtocolService projectProtocolService = null;
 
     public ProtocolVisitSubjectHelper() {
 
@@ -37,7 +40,7 @@ public class ProtocolVisitSubjectHelper {
         final XnatProjectdata p = XnatProjectdata.getXnatProjectdatasById(projectID, user, false);
         if (p == null) return null;
 
-        Protocol protocol = _projectProtocolService.getProtocolForProject(projectID, user);
+        Protocol protocol = getProjectProtocolService().getProtocolForProject(projectID, user);
         if (protocol == null) {
             // probably just doesn't have a protocol
             logger.debug("no protocol found for this project: " + projectID);
@@ -53,7 +56,7 @@ public class ProtocolVisitSubjectHelper {
 
     public boolean visitHasExperimentOrException(String visitId, String xsiType, String subtype, UserI user, boolean exceptionsAllowed) {
         boolean hasExperiment = visitHasExperiment(visitId, xsiType, subtype, user);
-        boolean hasException = _protocolExceptionService.findExceptionForVisitAndType(visitId, xsiType, subtype) != null;
+        boolean hasException = getProtocolExceptionService().findExceptionForVisitAndType(visitId, xsiType, subtype) != null;
         return hasExperiment || (exceptionsAllowed && hasException);
     }
 
@@ -165,10 +168,24 @@ public class ProtocolVisitSubjectHelper {
         return subtypes;
     }
 
-    @Inject
-    private ProtocolExceptionService _protocolExceptionService;
+    private static ProtocolService getProtocolService() {
+        if (protocolService == null) {
+            protocolService = XDAT.getContextService().getBean(ProtocolService.class);
+        }
+        return protocolService;
+    }
 
-    @Inject
-    private ProjectProtocolService _projectProtocolService;
+    private static ProtocolExceptionService getProtocolExceptionService() {
+        if (protocolExceptionService == null) {
+            protocolExceptionService = XDAT.getContextService().getBean(ProtocolExceptionService.class);
+        }
+        return protocolExceptionService;
+    }
 
+    private static ProjectProtocolService getProjectProtocolService() {
+        if (projectProtocolService == null) {
+            projectProtocolService = XDAT.getContextService().getBean(ProjectProtocolService.class);
+        }
+        return projectProtocolService;
+    }
 }

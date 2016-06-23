@@ -9,9 +9,9 @@
                 #set ( $url= "$url/project/$project")
             #end
             #if ($!ongoingExperiment.getExperiment().canRead($user))
-                <a href="$url" title="$!ongoingExperiment.getExperiment().getIdentifier($!project)">$user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+                <a href="$url" title="$!ongoingExperiment.getExperiment().getIdentifier($!project)">$displayManager.getSingularDisplayNameForElement($ongoingExperiment.getType())</A>
             #else
-                <a title="$!ongoingExperiment.getExperiment().getIdentifier($!project)" class="plainText">$user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+                <a title="$!ongoingExperiment.getExperiment().getIdentifier($!project)" class="plainText">$displayManager.getSingularDisplayNameForElement($ongoingExperiment.getType())</A>
             #end
         </TD>
         <TD class="assessorRowLabel">
@@ -37,9 +37,9 @@
                     #set ( $url= "$url/project/$project")
                 #end
                 #if($!assessor.getAssessor().canRead($user))
-                    &#8226;&nbsp;&nbsp;<a href="$url">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                    &#8226;&nbsp;&nbsp;<a href="$url">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                 #else
-                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                    &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                 #end
             </TD>
             <TD class="assessorRowLabel">
@@ -54,14 +54,14 @@
             <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
         </TR>
         #else
-            #if ($user.canEdit("${ongoingExperiment.getType()}/project", $project))
+            #if ($data.getSession().getAttribute("userHelper").canEdit("${ongoingExperiment.getType()}/project", $project))
             <TR class="assessorRowMissing">
                 <TD class="assessorRowDate"></TD>
                 <TD class="assessorRowName">
                     #set ($experimentID = $!ongoingExperiment.getExperiment().getId())
                     #set ($experimentField = "${ongoingExperiment.getType()}.ID")
                     #set ($visitlink = $link.setAction("XDATActionRouter").addPathInfo("xdataction",$assessor.getAction()).addPathInfo("search_element",$ongoingExperiment.getType()).addPathInfo("search_field",$experimentField).addPathInfo("search_value",$experimentID).addPathInfo("popup",$popup).toString())
-                    &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                    &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                 </TD>
                 <TD class="assessorRowLabel"></TD>
                 <TD class="assessorRowSubtype">$!assessor.getSubtype()</TD>
@@ -71,7 +71,7 @@
         #end
     #end
 #else
-    #if ($user.canEdit("${ongoingExperiment.getType()}/project", $project))
+    #if ($data.getSession().getAttribute("userHelper").canEdit("${ongoingExperiment.getType()}/project", $project))
         <TR class="expRowMissing">
             <TD class="expRowDate">Missing</TD>
             <TD class="expRowName">
@@ -80,7 +80,7 @@
                 #else
                     #set ($linkHack =$link.setAction("CreateExperiment").addPathInfo("data_type","$ongoingExperiment.getType()").addPathInfo("subject_id","$subject.getId()").addPathInfo("project","$project").toString())
                 #end
-                <A HREF="$linkHack">Create $user.getDisplayManager().getDisplayNameForElement($ongoingExperiment.getType())</A>
+                <A HREF="$linkHack">Create $displayManager.getSingularDisplayNameForElement($ongoingExperiment.getType())</A>
             </TD>
             <TD class="expRowLabel"></TD>
             <TD class="expRowSubtype">$!ongoingExperiment.getSubtype()</TD>

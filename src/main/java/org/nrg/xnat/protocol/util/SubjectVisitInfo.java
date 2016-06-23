@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.nrg.xdat.XDAT;
 import org.nrg.xdat.model.XnatProjectparticipantI;
 import org.nrg.xdat.om.XnatExperimentdata;
 import org.nrg.xdat.om.XnatImageassessordata;
@@ -92,6 +93,13 @@ public class SubjectVisitInfo {
     }
     public List<VisitInfo> getUnexpectedVisits() {
         return unexpectedVisits;
+    }
+
+    private ProtocolExceptionService getExceptionService() {
+        if (_service == null) {
+            _service = XDAT.getContextService().getBean(ProtocolExceptionService.class);
+        }
+        return _service;
     }
 
     private String populateProjectList(String projectId) {
@@ -428,7 +436,7 @@ public class SubjectVisitInfo {
             }
             else {
                 ProtocolException protocolException =
-                        _protocolExceptionService.findExceptionForVisitAndType(visitId, expectedExperiment.getType(), expectedExperiment.getSubtype());
+                        getExceptionService().findExceptionForVisitAndType(visitId, expectedExperiment.getType(), expectedExperiment.getSubtype());
                 if (protocol.getAllowExceptions() && protocolException != null) {
                     ExperimentInfo experimentInfo = new ExperimentInfo();
                     experimentInfo.experiment = protocolException;
@@ -545,7 +553,7 @@ public class SubjectVisitInfo {
             }
             else {
                 ProtocolException protocolException =
-                        _protocolExceptionService.findExceptionForVisitAndType(visitId, floatingExperiment.getType(), floatingExperiment.getSubtype());
+                        getExceptionService().findExceptionForVisitAndType(visitId, floatingExperiment.getType(), floatingExperiment.getSubtype());
                 if (protocol.getAllowExceptions() && protocolException != null) {
                     ExperimentInfo experimentInfo = new ExperimentInfo();
                     experimentInfo.experiment = protocolException;
@@ -617,7 +625,7 @@ public class SubjectVisitInfo {
             }
             else {
                 ProtocolException protocolException =
-                        _protocolExceptionService.findExceptionForVisitAndType(visitId, expectedAssessor.getType(), experimentId);
+                        getExceptionService().findExceptionForVisitAndType(visitId, expectedAssessor.getType(), experimentId);
                 if (protocol.getAllowExceptions() && protocolException != null) {
                     AssessorInfo assessorInfo = new AssessorInfo();
                     assessorInfo.assessor = protocolException;
@@ -884,7 +892,4 @@ public class SubjectVisitInfo {
             return required;
         }
     }
-
-    @Inject
-    private ProtocolExceptionService _protocolExceptionService;
 }

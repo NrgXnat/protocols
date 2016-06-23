@@ -32,7 +32,7 @@ public class ModifyPvisit extends SecureAction {
 
     public void doPerform(RunData data, Context context) throws Exception {
         PopulateItem populater = PopulateItem.Populate(data,"xnat:pVisitData",true);
-        UserI user = null; //XDAT.getUserDetails();
+        UserI user = XDAT.getUserDetails();
 
         Exception error=null;
         if (populater.hasError())

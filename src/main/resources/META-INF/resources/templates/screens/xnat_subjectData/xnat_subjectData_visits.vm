@@ -10,7 +10,7 @@
     #foreach ($visit in $SubjectVisitInfo.getVisits())
         ##set ($nextVisits = $visit.getNextVisits().size())
     <div class="assessorsWrapper">
-				<div style="float:right;">
+				<div style="float:right; position: relative; top: -5px">
 					#if ($visit.getUserCanEdit())
 						#if (!$visit.getClosed())
 							<button class="toolbar" ng-click="deleteVisit('$!visit.getId()');"><span class="icon icon-sm icon-trash-gray"></span> {{labels.visits.deleteVisit}}</button>
@@ -110,7 +110,7 @@
                         #set ($protocolException = $!expectedExperiment.getExperiment())
                     <tr class="expRowException">
                         <td class="expRowDate">$!expectedExperiment.getExperiment().get_date()</td>
-                        <td class="expRowName">$user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                        <td class="expRowName">$displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())
                             #if (!$visit.getClosed())
                                 #if ($user.isOwner($project) || $user.isSiteAdmin())
                                     <a class="inline-link" title="Remove Deviation" ng-click="removeExperimentDeviation('$visit.getId()','$expectedExperiment.getType()','$!expectedExperiment.getEscapedSubtype()')">
@@ -141,16 +141,16 @@
                                 #end
                                 #if ($!expectedExperiment.getExperiment().canRead($user))
                                     <a href="$visitlink" title="$!expectedExperiment.getExperiment().getIdentifier($!project)">
-                                        $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                        $displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())
                                     </a>
                                 #else
                                     <a title="$!expectedExperiment.getExperiment().getIdentifier($!project)" class="plainText">
-                                        $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                        $displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())
                                     </a>
                                 #end
                                 $floatingTip
                                 #if(!$visit.getClosed())
-                                    #if ($user.canEdit("${expectedExperiment.getType()}/project", $project))
+                                    #if ($data.getSession().getAttribute("userHelper").canEdit("${expectedExperiment.getType()}/project", $project))
                                         <a class="inline-link" title="remove from visit" onclick="removeFromVisit('$!visit.getId()','$!expectedExperiment.getExperiment().getId()')">
                                             <span class="icon icon-sm icon-remove"></span>
                                         </a>
@@ -162,7 +162,7 @@
                         </tr>
                         #else
                             <!-- Missing Experiment -->
-                            #if($user.canEdit("${expectedExperiment.getType()}/project", $project) && ($expectedExperiment.getRequired() || !$visit.getClosed()))
+                            #if($data.getSession().getAttribute("userHelper").canEdit("${expectedExperiment.getType()}/project", $project) && ($expectedExperiment.getRequired() || !$visit.getClosed()))
                             <tr #if ($expectedExperiment.getRequired()) class="expRowMissingRequired" #else class="expRowMissing" #end >
                                 #if ($expectedExperiment.getImageSession())
                                     #set ($visitlink =$link.setAction("XDATActionRouter").addPathInfo('xdataction','LaunchUploadApplet').addPathInfo("search_field","xnat:subjectData.ID").addPathInfo("search_value","$subject.getId()").addPathInfo("project","$project").addPathInfo("visit","$visit.getId()").addQueryData("subtype","$!expectedExperiment.getSubtype()").toString())
@@ -171,16 +171,16 @@
                                 #end
                                 <td class="expRowDate">
 																	#if ($expectedExperiment.getCreateLink())
-                                    <a href="$visitlink" class="table-link-icon" title="Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())"><span class="icon icon-sm icon-add"></span></a>
+                                    <a href="$visitlink" class="table-link-icon" title="Create $displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())"><span class="icon icon-sm icon-add"></span></a>
 																	#end
                                 </td>
                                 <td class="expRowName">
                                     #if ($visit.getClosed())
-                                        Open Visit to Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+                                        Open Visit to Create $displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())
                                     #elseif ($expectedExperiment.getCreateLink())
-                                        <a href="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())</a>
+                                        <a href="$visitlink">Create $displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())</a>
 																		#else
-																				$user.getDisplayManager().getDisplayNameForElement($expectedExperiment.getType())
+																				$displayManager.getSingularDisplayNameForElement($expectedExperiment.getType())
                                     #end
                                     $floatingTip
                                 </td>
@@ -204,7 +204,7 @@
                                 #set ($protocolException = $!assessor.getAssessor())
                             <TR class="assessorRowException">
                                 <TD class="assessorRowDate">$protocolException.get_date()</TD>
-                                <TD class="assessorRowName">&#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                <TD class="assessorRowName">&#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                     #if(!$visit.getClosed())
                                         #if($user.isOwner($project) || $user.isSiteAdmin())
                                             <a class="inline-link" title="Remove Deviation" ng-click="removeExperimentDeviation('$visit.getId()','$assessor.getType()','$!expectedExperiment.getExperiment().getId()')">
@@ -231,9 +231,9 @@
                                         #set ($visitlink= "$visitlink/project/$project")
                                     #end
                                     #if ($!assessor.getAssessor().canRead($user))
-                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                                     #else
-                                        &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                        &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                     #end
                                 </TD>
                                 <TD class="assessorRowLabel">
@@ -249,7 +249,7 @@
                             </TR>
                             #else
                             <!-- Missing Assessor -->
-                                #if ($user.canEdit("${expectedExperiment.getType()}/project", $project) && ($assessor.getRequired() || !$visit.getClosed()))
+                                #if ($data.getSession().getAttribute("userHelper").canEdit("${expectedExperiment.getType()}/project", $project) && ($assessor.getRequired() || !$visit.getClosed()))
                                 <TR #if ($assessor.getRequired()) class="assessorRowMissingRequired" #else class="assessorRowMissing" #end >
                                     #set ($experimentID = $!expectedExperiment.getExperiment().getId())
                                     #set ($experimentField = "${expectedExperiment.getType()}.ID")
@@ -257,17 +257,17 @@
                                     <TD class="assessorRowDate">
                                         #if(!$visit.getClosed())
 																					#if ($expectedExperiment.getCreateLink())
-                                            <a class="table-link-icon" href="$visitlink" title="Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())"><span class="icon icon-sm icon-add"></span></a>
+                                            <a class="table-link-icon" href="$visitlink" title="Create $displayManager.getSingularDisplayNameForElement($assessor.getType())"><span class="icon icon-sm icon-add"></span></a>
 																					#end
                                         #end
                                     </TD>
                                     <TD class="assessorRowName">
                                         #if ($visit.getClosed())
-                                            Open Visit to Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                            Open Visit to Create $displayManager.getSingularDisplayNameForElement($assessor.getType())
                                         #elseif ($expectedExperiment.getCreateLink())
-                                            &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                            &#8226;&nbsp;&nbsp;<A HREF="$visitlink">Create $displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
 																				#else
-																						&#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+																						&#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                         #end
                                     </TD>
                                     <TD class="assessorRowLabel">
@@ -301,9 +301,9 @@
                                     #set ($visitlink= "$visitlink/project/$project")
                                 #end
                                 #if ($!assessor.getAssessor().canRead($user))
-                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                                 #else
-                                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                    &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                 #end
                             </TD>
                             <TD class="assessorRowLabel">
@@ -344,11 +344,11 @@
                     #end
                     #if ($!unexpectedExperiment.getExperiment().canRead($user))
                         <A href="$visitlink" title="$!unexpectedExperiment.getExperiment().getIdentifier($!project)">
-                            $user.getDisplayManager().getDisplayNameForElement($unexpectedExperiment.getType())
+                            $displayManager.getSingularDisplayNameForElement($unexpectedExperiment.getType())
                         </A>
                     #else
                         <A title="$!unexpectedExperiment.getExperiment().getIdentifier($!project)" class="plainText">
-                            $user.getDisplayManager().getDisplayNameForElement($unexpectedExperiment.getType())
+                            $displayManager.getSingularDisplayNameForElement($unexpectedExperiment.getType())
                         </A>
                     #end
                     #if(!$!visit.getClosed())
@@ -376,9 +376,9 @@
                             #set ($visitlink= "$visitlink/project/$project")
                         #end
                         #if ($!assessor.getAssessor().canRead($user))
-                            &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                            &#8226;&nbsp;&nbsp;<A href="$visitlink">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                         #else
-                            &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                            &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                         #end
                     </TD>
                     <TD class="assessorRowLabel">
@@ -451,11 +451,11 @@
                                 #end
                                 #if ($!experiment.getExperiment().canRead($user))
                                     <A href="$visitlink" title="$!experiment.getExperiment().getIdentifier($!project)">
-                                        $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                        $displayManager.getSingularDisplayNameForElement($experiment.getType())
                                     </A>
                                 #else
                                     <A title="$!experiment.getExperiment().getIdentifier($!project)" class="plainText">
-                                        $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                        $displayManager.getSingularDisplayNameForElement($experiment.getType())
                                     </A>
                                 #end
                             </TD>
@@ -473,9 +473,9 @@
                                         #set ($visitlink= "$visitlink/project/$project")
                                     #end
                                     #if ($!assessor.getAssessor().canRead($user))
-                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                        &#8226;&nbsp;&nbsp;<A href="$visitlink">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                                     #else
-                                        &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                        &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                     #end
                                 </TD>
                                 <TD class="assessorRowLabel">
@@ -570,11 +570,11 @@
                             #end
                             #if ($!experiment.getExperiment().canRead($user))
                                 <A href="$visitlink" title="$!experiment.getExperiment().getIdentifier($!project)">
-                                    $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                    $displayManager.getSingularDisplayNameForElement($experiment.getType())
                                 </A>
                             #else
                                 <A title="$!experiment.getExperiment().getIdentifier($!project)" class="plainText">
-                                    $user.getDisplayManager().getDisplayNameForElement($experiment.getType())
+                                    $displayManager.getSingularDisplayNameForElement($experiment.getType())
                                 </A>
                             #end
                             #if(!$!unexpectedVisit.getClosed())
@@ -597,9 +597,9 @@
                                     #set ($visitlink= "$visitlink/project/$project")
                                 #end
                                 #if ($!assessor.getAssessor().canRead($user))
-                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$user.getDisplayManager().getDisplayNameForElement($assessor.getType())</A>
+                                    &#8226;&nbsp;&nbsp;<A href="$visitlink">$displayManager.getSingularDisplayNameForElement($assessor.getType())</A>
                                 #else
-                                    &#8226;&nbsp;&nbsp;$user.getDisplayManager().getDisplayNameForElement($assessor.getType())
+                                    &#8226;&nbsp;&nbsp;$displayManager.getSingularDisplayNameForElement($assessor.getType())
                                 #end
                             </TD>
                             <TD class="assessorRowLabel">
