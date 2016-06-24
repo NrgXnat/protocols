@@ -13,17 +13,19 @@
     #set($subject_id = $!om.getId())
 #end
 <script>
-
 YAHOO.util.Event.onDOMReady( function() {
+/*
   var callback={
     success:function(oResponse){
       if(oResponse.responseText.indexOf("NOPROTOCOL") == -1)
 			//TODO: FIX THIS ...if the string "NOPROTOCOL" ends up anywhere in the response, this page will act as if no protocol is associated
       {
-				$('<div id="visitApp" ng-app="subjectVisits"></div>').insertBefore('#assessor_tabs');
+		$('<div id="visitApp" ng-app="subjectVisits"></div>').insertBefore('#assessor_tabs');
         $("#visitApp").html(oResponse.responseText);
-				$('#assessor_tabs').hide();  // Removing this instead of hiding it also removes all DOM elements defined further down on the page
-				setTimeout(function(){ angular.bootstrap(document, ['subjectVisits']); }, 500);
+		$('#assessor_tabs').hide();  // Removing this instead of hiding it also removes all DOM elements defined further down on the page
+//        loadSubjectVisits();
+console.log("inside callback: " + angular.element($("#visitApp")).scope() );
+//        setTimeout(loadVisits, 100);
       } else {
 				$("#hideAssessors").show();
         XNAT.app.assessor_tabs.assessor_tab_summary.removeTab(XNAT.app.assessor_tabs.assessor_tab_summary.getTab(0));
@@ -35,17 +37,28 @@ YAHOO.util.Event.onDOMReady( function() {
       xModalMessage('Error', oResponse);
     }
   };
-
+*/
   openModalPanel("load_history","Retrieving Visit Data...");
-  YAHOO.util.Connect.asyncRequest('GET',serverRoot +'/app/template/ProtocolHelper.vm/search_value/$om.getId()/search_element/xnat:subjectData/search_field/xnat:subjectData.ID/project/$project',callback,null);
+
+  $.get(serverRoot +'/app/template/ProtocolHelper.vm/search_value/$om.getId()/search_element/xnat:subjectData/search_field/xnat:subjectData.ID/project/$project', null, function (data){
+      if(data.indexOf("NOPROTOCOL") == -1)
+      //TODO: FIX THIS ...if the string "NOPROTOCOL" ends up anywhere in the response, this page will act as if no protocol is associated
+      {
+		loadVisits(data);
+      } else {
+        $("#hideAssessors").show();
+        XNAT.app.assessor_tabs.assessor_tab_summary.removeTab(XNAT.app.assessor_tabs.assessor_tab_summary.getTab(0));
+      }
+      closeModalPanel("load_history");
+  }, 'html');
+
+//  YAHOO.util.Connect.asyncRequest('GET',serverRoot +'/app/template/ProtocolHelper.vm/search_value/$om.getId()/search_element/xnat:subjectData/search_field/xnat:subjectData.ID/project/$project',callback,null);
 });
 </script>
 
 #parse("/screens/VisitFunctions.vm")
 <div id="hideAssessors" style="display:none">
 </div>  <!-- hideAssessors end -->
-
-
 
 <script type="text/ng-template" id="template.dialog.openVisit">
 	<div class="dialog-header-warning" ng-show="cachedVisit.terminal"><span class="icon icon-sm icon-alert"/>&nbsp;{{dialog.openVisit.labels.lastVisitTerminalWarning}}</div>

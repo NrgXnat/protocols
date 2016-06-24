@@ -2,6 +2,16 @@
 var jq = jQuery;
 jq.ajaxSetup({cache: false});
 
+function loadVisits(data){
+    console.log("inside loadVisits(): " + angular.element($("#visitApp")).scope() );
+    if(!angular.element($("#visitApp")).scope()) {
+        $('<div id="visitApp" ng-app="subjectVisits"></div>').insertBefore('#assessor_tabs');
+        $("#visitApp").html(data);
+        $('#assessor_tabs').hide();  // Removing this instead of hiding it also removes all DOM elements defined further down on the page
+        angular.bootstrap(document, ['subjectVisits']);
+    }
+}
+
 function confirmDeleteVisit(visitID){
       xModalConfirm({
         content: 'Are you sure you want to delete this visit?',
