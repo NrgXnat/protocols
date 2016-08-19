@@ -1,10 +1,14 @@
 # Visits & Protocols Plugin for XNAT 1.7 #
 
-This is a fork of the Visits & Protocols module for XNAT 1.6.5 implemented as an XNAT 1.7 plugin.
+This is a fork of the Visits & Protocols module from XNAT 1.6.5 implemented as an XNAT 1.7 plugin.
 
-Some documentation in the form of a presentation I'm giving at the XNAT Workshop 2016:
+The latest built versions of this plugin can be downloaded here: http://marketplace.xnat.org/plugin/visits-protocols-plugin-alpha-xnat-1-7/
+
+Here is some documentation in the form of a presentation I've given at the 2016 XNAT Workshop:
 
 https://docs.google.com/presentation/d/1Vkc3hSc76spnuYlXJcaNimP1r-_0MKeWIIrsKpbnGc8/edit?usp=sharing
+
+Formal Wiki documentation on the plugin is in the works following an official release of core XNAT 1.7
 
 # Building #
 
@@ -30,6 +34,10 @@ Installing the plugin is as simple as stopping the Tomcat server running your XN
 
 # Log into your XNAT as an administrator once it's completed the start-up process.
 # Click the menu command **Administer->Protocols**.
-# Follow the instructions here on how to go about setting up protocols and managing visits: 
-https://wiki.xnat.org/pages/viewpage.action?pageId=21495813
-https://wiki.xnat.org/pages/viewpage.action?pageId=21037137
+# And follow this updated tutorial documentation to get started:
+
+For Administrators and Project Owners...
+Protocol Management: https://wiki.xnat.org/pages/viewpage.action?pageId=21037137
+
+For Researchers & Data Collection Personnel
+Subject Visit Workflow: https://wiki.xnat.org/pages/viewpage.action?pageId=21495813

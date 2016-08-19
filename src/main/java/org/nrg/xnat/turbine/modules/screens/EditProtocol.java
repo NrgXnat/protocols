@@ -1,7 +1,7 @@
 package org.nrg.xnat.turbine.modules.screens;
 
 /*
- * org.nrg.xnat.turbine.modules.screens.ManageProtocol
+ * org.nrg.xnat.turbine.modules.screens.EditProtocol
  * XNAT http://www.xnat.org
  * Copyright (c) 2013, Washington University School of Medicine
  * All Rights Reserved
