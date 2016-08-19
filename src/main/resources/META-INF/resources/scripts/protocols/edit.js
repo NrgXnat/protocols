@@ -1,3 +1,13 @@
+/*
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2016, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ *
+ * Author: Justin Cleveland <clevelandj@wustl.edu> (jcleve01)
+ */
+
 var editProtocolModule = angular.module('editProtocol', ['ngResource', 'ui.bootstrap', 'protocol.services', 'protocol.directives'])
 .controller('EditProtocolController', function($scope, $compile, $timeout, $sce, Protocol, ProjectsUsingProtocol, Projects, User){
 	$scope.ProtocolService = Protocol;

@@ -1,3 +1,13 @@
+/*
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2016, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ *
+ * Author: Justin Cleveland <clevelandj@wustl.edu> (jcleve01)
+ */
+
 var subjectVisitController = angular.module('subjectVisits', ['ngResource', 'ui.bootstrap', 'protocol.services', 'protocol.directives'])
 .controller('SubjectVisitController', function($scope, $compile, $timeout, $sce, $location, Protocol, Visit, VisitReport, Projects, User){
 	$scope.protocol = XNAT.data.page.protocol;

@@ -1,5 +1,13 @@
 package org.nrg.xnat.protocol.services;
 
+/*
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2016, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ */
+
 import org.nrg.xdat.om.XnatPvisitdata;
 import org.nrg.xft.security.UserI;
 import org.nrg.xnat.protocol.entities.ProjectProtocol;
