@@ -52,7 +52,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
 
         String projectId = (String) getParameter(request, "PROJECT_ID");
         if (projectId != null) {
-            project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false);
+            project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false);
         }
         if (project == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -60,7 +60,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
             return;
         }
 
-        protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
+        protocol = getProjectProtocolService().getProtocolForProject(projectId, getUser());
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             getResponse().setEntity("Project " + projectId + " does not have a protocol associated with it.", MediaType.TEXT_PLAIN);
@@ -69,10 +69,10 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
 
         String subjectId = (String) getParameter(request, "SUBJECT_ID");
         if (subjectId != null) {
-            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, user, false);
+            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, getUser(), false);
         }
         if (subject == null) {
-            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, user, false);
+            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, getUser(), false);
             if (subject != null && (project != null && !subject.hasProject(project.getId()))) {
                 subject = null;
             }
@@ -84,7 +84,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
 
         String visitId = (String) getParameter(request, "VISIT_ID");
         if (visitId != null) {
-            visit = XnatPvisitdata.getXnatPvisitdatasById(visitId, user, completeDocument);
+            visit = XnatPvisitdata.getXnatPvisitdatasById(visitId, getUser(), completeDocument);
             //visits aren't really associated with projects in anyway so we don't have to test that here.
         }
         if (visit == null) {
@@ -111,7 +111,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
 
     @Override
     public boolean allowPost() {
-        return (Roles.isSiteAdmin(user) || UserHelper.getUserHelperService(user).isOwner(project.getId()));
+        return (Roles.isSiteAdmin(getUser()) || UserHelper.getUserHelperService(getUser()).isOwner(project.getId()));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
             return;
         }
 
-        ProtocolException protocolException = new ProtocolException(reason, project.getId(), subject.getId(), visit.getId(), xsiType, user.getUsername());
+        ProtocolException protocolException = new ProtocolException(reason, project.getId(), subject.getId(), visit.getId(), xsiType, getUser().getUsername());
         protocolException.set_date(new Date(new java.util.Date().getTime()));
         if (subtype != null) {
             protocolException.set_subtype(subtype);
@@ -155,7 +155,7 @@ public class ProtocolExceptionResource extends AbstractProtocolResource {
 
     @Override
     public boolean allowDelete() {
-        return (Roles.isSiteAdmin(user) || UserHelper.getUserHelperService(user).isOwner(project.getId()));
+        return (Roles.isSiteAdmin(getUser()) || UserHelper.getUserHelperService(getUser()).isOwner(project.getId()));
     }
 
     @Override

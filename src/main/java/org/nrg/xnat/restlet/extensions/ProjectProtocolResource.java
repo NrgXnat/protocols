@@ -61,35 +61,35 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
 
     @Override
     public boolean allowDelete() {
-        return (Roles.isSiteAdmin(user) || UserHelper.getUserHelperService(user).isOwner(projectId));
+        return (Roles.isSiteAdmin(getUser()) || UserHelper.getUserHelperService(getUser()).isOwner(projectId));
     }
 
     @Override
     public void handleDelete() {
-        if (!UserHelper.getUserHelperService(user).isOwner(projectId) && !Roles.isSiteAdmin(user)) {
+        if (!UserHelper.getUserHelperService(getUser()).isOwner(projectId) && !Roles.isSiteAdmin(getUser())) {
             getResponse().setStatus(Status.CLIENT_ERROR_FORBIDDEN);
             getResponse().setEntity("You do not have permissions to modify protocols associations with this project.", MediaType.TEXT_PLAIN);
             return;
         }
-        getProjectProtocolService().removeProtocolFromProject(projectId, user);
+        getProjectProtocolService().removeProtocolFromProject(projectId, getUser());
         getResponse().setStatus(Status.SUCCESS_OK);
     }
 
     @Override
     public boolean allowPut() {
-        return (Roles.isSiteAdmin(user) || UserHelper.getUserHelperService(user).isOwner(projectId));
+        return (Roles.isSiteAdmin(getUser()) || UserHelper.getUserHelperService(getUser()).isOwner(projectId));
     }
 
     @Override
     public void handlePut() {
-        XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false); // just checking to see if user has project access at all
+        XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false); // just checking to see if user has project access at all
         if (project == null) {
             getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             getResponse().setEntity("The project ID " + projectId + " does not result in a valid project.", MediaType.TEXT_PLAIN);
             return;
         }
 
-        if (!UserHelper.getUserHelperService(user).isOwner(projectId) && !Roles.isSiteAdmin(user)) {
+        if (!UserHelper.getUserHelperService(getUser()).isOwner(projectId) && !Roles.isSiteAdmin(getUser())) {
             getResponse().setStatus(Status.CLIENT_ERROR_FORBIDDEN);
             getResponse().setEntity("You do not have permissions to modify protocols associations with this project.", MediaType.TEXT_PLAIN);
             return;
@@ -108,14 +108,14 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
             else {
                 protocol = getProtocolService().getProtocolById(protocolId);
             }
-            getProjectProtocolService().assignProtocolToProject(project, protocol, user);
+            getProjectProtocolService().assignProtocolToProject(project, protocol, getUser());
             getResponse().setStatus(Status.SUCCESS_OK);
 
             //DELETE storedSearches
             for(XdatStoredSearch bundle: project.getBundles()) {
                 if(bundle.getBriefDescription() != null && bundle.getBriefDescription().startsWith("Visit:")){
                     try {
-                        SaveItemHelper.authorizedDelete(bundle.getItem(), user, EventUtils.newEventInstance(EventUtils.CATEGORY.PROJECT_ADMIN, EventUtils.TYPE.WEB_SERVICE, "Saved Search Deletion"));
+                        SaveItemHelper.authorizedDelete(bundle.getItem(), getUser(), EventUtils.newEventInstance(EventUtils.CATEGORY.PROJECT_ADMIN, EventUtils.TYPE.WEB_SERVICE, "Saved Search Deletion"));
                     } catch (Throwable e) {
                         _log.error("",e);
                     }
@@ -139,7 +139,7 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
 
     @Override
     public Representation represent(Variant variant) throws ResourceException {
-        XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false); // just checking to see if user has project access
+        XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false); // just checking to see if user has project access
         if (project == null) {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "The project ID " + projectId + " does not result in a valid project.");
         }
@@ -152,10 +152,10 @@ public class ProjectProtocolResource extends AbstractProtocolResource {
         catch (Exception ignored) {} // almost certainly just a NumberFormatException
 
         if (version != null) {
-            protocol = getProjectProtocolService().getPreviousProtocolForProject(projectId, version, user);
+            protocol = getProjectProtocolService().getPreviousProtocolForProject(projectId, version, getUser());
         }
         else {
-            protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
+            protocol = getProjectProtocolService().getProtocolForProject(projectId, getUser());
         }
 
         if (protocol == null) {

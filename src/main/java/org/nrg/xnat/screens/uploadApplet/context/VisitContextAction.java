@@ -13,9 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.turbine.util.RunData;
 import org.apache.velocity.context.Context;
 import org.nrg.xdat.turbine.utils.TurbineUtils;
-import org.nrg.xnat.turbine.modules.screens.LaunchUploadApplet;
 
-public class VisitContextAction { //implements LaunchUploadApplet.ContextAction {
+public class VisitContextAction {
     public void execute(RunData data, Context context) {
         if (!StringUtils.isEmpty((String) TurbineUtils.GetPassedParameter("visit", data))) {
             context.put("visit", StringUtils.trimToEmpty((String)TurbineUtils.GetPassedParameter("visit",data)));

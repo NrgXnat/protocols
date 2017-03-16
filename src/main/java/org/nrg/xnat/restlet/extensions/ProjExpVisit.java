@@ -41,7 +41,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
         //we need to grab the project, subject, experiment and visit.
         String projectId = (String) getParameter(request, "PROJECT_ID");
         if (projectId != null) {
-            project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false);
+            project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false);
         }
         if (project == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -49,7 +49,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
             return;
         }
 
-        protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
+        protocol = getProjectProtocolService().getProtocolForProject(projectId, getUser());
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             response.setEntity("Project " + projectId + " does not have a protocol associated with it.", MediaType.TEXT_PLAIN);
@@ -58,10 +58,10 @@ public class ProjExpVisit extends AbstractProtocolResource {
 
         String subjectId = (String) getParameter(request, "SUBJECT_ID");
         if (subjectId != null) {
-            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, user, false);
+            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, getUser(), false);
         }
         if (subject == null) {
-            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, user, false);
+            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, getUser(), false);
             if (subject != null && (project != null && !subject.hasProject(project.getId()))) {
                 subject = null;
             }
@@ -73,7 +73,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
 
         String experimentId = (String) getParameter(request, "EXPERIMENT_ID");
         if (experimentId != null) {
-            experiment = XnatExperimentdata.getXnatExperimentdatasById(experimentId, user, completeDocument);
+            experiment = XnatExperimentdata.getXnatExperimentdatasById(experimentId, getUser(), completeDocument);
             if (experiment != null && (project != null && !experiment.hasProject(project.getId()))) {
                 response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
                 response.setEntity("Experiment " + experimentId + " not associated with project " + projectId + ".", MediaType.TEXT_PLAIN);
@@ -88,7 +88,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
 
         String visitIdOrName = URLDecoder.decode((String) getParameter(request, "VISIT_ID_OR_NAME"), "UTF-8");
         if (visitIdOrName != null) {
-            visit = XnatPvisitdata.getXnatPvisitdatasById(visitIdOrName, user, completeDocument);
+            visit = XnatPvisitdata.getXnatPvisitdatasById(visitIdOrName, getUser(), completeDocument);
             //visits aren't really associated with projects in any way so we don't have to test that here.
         }
         // if no visit was found by id, we check to see whether we were passed the visit name instead
@@ -98,7 +98,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
             cc.addClause("xnat:pVisitData/subject_id", subjectId);
             cc.addClause("xnat:experimentData/project", projectId);
 
-            List<XnatPvisitdata> list = XnatPvisitdata.getXnatPvisitdatasByField(cc, user, false);
+            List<XnatPvisitdata> list = XnatPvisitdata.getXnatPvisitdatasByField(cc, getUser(), false);
             if (list.size() > 0) {
                 visit = list.get(0);
             }
@@ -124,7 +124,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
     @Override
     public boolean allowDelete() {
         try {
-            return experiment.canEdit(user);
+            return experiment.canEdit(getUser());
         } catch (Exception e) {
             return false;
         }
@@ -145,7 +145,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
         if (visitId.equalsIgnoreCase(unsharedVisit)) {
             experiment.setVisit("NULL");
             try {
-                experiment.save(user, true, false, null);
+                experiment.save(getUser(), true, false, null);
                 goterdone = true;
             } catch (Exception e) {
                 _log.error(e.getMessage());
@@ -159,7 +159,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
                     EventMetaI c = null;
                     try {
                         pp.setVisit("NULL");
-                        SaveItemHelper.authorizedSave(((XnatExperimentdataShare) pp).getItem(), user, true, false, c);
+                        SaveItemHelper.authorizedSave(((XnatExperimentdataShare) pp).getItem(), getUser(), true, false, c);
                         goterdone = true;
                     } catch (Exception e) {
                         _log.error(e.getMessage());
@@ -182,7 +182,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
     @Override
     public boolean allowPut() {
         try {
-            return experiment.canEdit(user);
+            return experiment.canEdit(getUser());
         } catch (Exception e) {
             return false;
         }
@@ -206,12 +206,12 @@ public class ProjExpVisit extends AbstractProtocolResource {
 
         // we need to check if an experiment is unexpected if a) unexpected experiments are not allowed or b) they
         // are allowed but the user does not have permissions to assign them
-        if (!protocol.getAllowUnexpectedExperiments() || (!UserHelper.getUserHelperService(user).isOwner(projectId) && !Roles.isSiteAdmin(user))) {
+        if (!protocol.getAllowUnexpectedExperiments() || (!UserHelper.getUserHelperService(getUser()).isOwner(projectId) && !Roles.isSiteAdmin(getUser()))) {
 
             // check whether experiment and protocol are on the list of expected experiments for this visit type
             try {
                 // get info on the visit in question
-                SubjectVisitInfo subjectVisitInfo = new SubjectVisitInfo(subject, projectId, user);
+                SubjectVisitInfo subjectVisitInfo = new SubjectVisitInfo(subject, projectId, getUser());
                 SubjectVisitInfo.VisitInfo visitInfo = null;
                 for (SubjectVisitInfo.VisitInfo vi : subjectVisitInfo.getVisits()) {
                     if (visitId.equals(vi.getId())) {
@@ -263,7 +263,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
                 experiment.setProtocol(subtype);
             }
             try {
-                experiment.save(user, true, false, null);
+                experiment.save(getUser(), true, false, null);
             } catch (Exception e) {
                 _log.error(e.getMessage());
                 this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -278,7 +278,7 @@ public class ProjExpVisit extends AbstractProtocolResource {
                         experiment.setProtocol(subtype);
                     }
                     try {
-                        experiment.save(user, true, false, null);
+                        experiment.save(getUser(), true, false, null);
                     } catch (Exception e) {
                         _log.error(e.getMessage());
                         this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND);

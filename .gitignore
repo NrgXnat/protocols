@@ -1,8 +1,8 @@
-src/generated/
-src/beans/
 *.iml
 *.log
-/target
 /build
-/.gradle
+/.gradle*
+/.idea
 _*.bat
+_*.sh
+dependencies.txt

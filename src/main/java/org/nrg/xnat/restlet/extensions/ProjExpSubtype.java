@@ -46,7 +46,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
         //we need to grab the project, subject, experiment and visit.
         String projectId = (String) getParameter(request, "PROJECT_ID");
         if (projectId != null) {
-            project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false);
+            project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false);
         }
         if (project == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -54,7 +54,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
             return;
         }
 
-        protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
+        protocol = getProjectProtocolService().getProtocolForProject(projectId, getUser());
         if (protocol == null) {
             response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             response.setEntity("Project " + projectId + " does not have a protocol associated with it.", MediaType.TEXT_PLAIN);
@@ -63,10 +63,10 @@ public class ProjExpSubtype extends AbstractProtocolResource {
 
         String subjectId = (String) getParameter(request, "SUBJECT_ID");
         if (subjectId != null) {
-            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, user, false);
+            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(project.getId(), subjectId, getUser(), false);
         }
         if (subject == null) {
-            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, user, false);
+            subject = XnatSubjectdata.getXnatSubjectdatasById(subjectId, getUser(), false);
             if (subject != null && (project != null && !subject.hasProject(project.getId()))) {
                 subject = null;
             }
@@ -78,7 +78,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
 
         String experimentId = (String) getParameter(request, "EXPERIMENT_ID");
         if (experimentId != null) {
-            experiment = XnatExperimentdata.getXnatExperimentdatasById(experimentId, user, completeDocument);
+            experiment = XnatExperimentdata.getXnatExperimentdatasById(experimentId, getUser(), completeDocument);
             if (experiment != null && (project != null && !experiment.hasProject(project.getId()))) {
                 response.setStatus(Status.CLIENT_ERROR_NOT_FOUND);
                 response.setEntity("Experiment " + experimentId + " not associated with project " + projectId + ".", MediaType.TEXT_PLAIN);
@@ -106,7 +106,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
     @Override
     public boolean allowDelete() {
         try {
-            return experiment.canEdit(user);
+            return experiment.canEdit(getUser());
         } catch (Exception e) {
             return false;
         }
@@ -116,7 +116,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
     public void handleDelete() {
         experiment.setProtocol("NULL");
         try {
-            experiment.save(user, true, false, null);
+            experiment.save(getUser(), true, false, null);
         } catch (Exception e) {
             _log.error(e.getMessage());
             this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -130,7 +130,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
     @Override
     public boolean allowPut() {
         try {
-            return experiment.canEdit(user);
+            return experiment.canEdit(getUser());
         } catch (Exception e) {
             return false;
         }
@@ -140,7 +140,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
     public void handlePut() {
         String projectId = project.getId();
         String visitId = experiment.getVisit();
-        XnatPvisitdata visit = AutoXnatPvisitdata.getXnatPvisitdatasById(visitId, user, false);
+        XnatPvisitdata visit = AutoXnatPvisitdata.getXnatPvisitdatasById(visitId, getUser(), false);
 
         if (visit != null) {
             if (visit.getClosed() != null && visit.getClosed()) {
@@ -151,12 +151,12 @@ public class ProjExpSubtype extends AbstractProtocolResource {
 
             // we need to check if an experiment is unexpected if a) unexpected experiments are not allowed or b) they
             // are allowed but the user does not have permissions to assign them
-            if (!protocol.getAllowUnexpectedExperiments() || (!UserHelper.getUserHelperService(user).isOwner(subject.getProject()) && !Roles.isSiteAdmin(user))) {
+            if (!protocol.getAllowUnexpectedExperiments() || (!UserHelper.getUserHelperService(getUser()).isOwner(subject.getProject()) && !Roles.isSiteAdmin(getUser()))) {
 
                 // check whether experiment and protocol are on the list of expected experiments for this visit type
                 try {
                     // get info on the visit in question
-                    SubjectVisitInfo subjectVisitInfo = new SubjectVisitInfo(subject, projectId, user);
+                    SubjectVisitInfo subjectVisitInfo = new SubjectVisitInfo(subject, projectId, getUser());
                     SubjectVisitInfo.VisitInfo visitInfo = null;
                     for (SubjectVisitInfo.VisitInfo vi : subjectVisitInfo.getVisits()) {
                         if (visitId.equals(vi.getId())) {
@@ -207,7 +207,7 @@ public class ProjExpSubtype extends AbstractProtocolResource {
         else {
             experiment.setProtocol(subtype);
             try {
-                experiment.save(user, true, false, null);
+                experiment.save(getUser(), true, false, null);
             } catch (Exception e) {
                 _log.error(e.getMessage());
                 this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND);

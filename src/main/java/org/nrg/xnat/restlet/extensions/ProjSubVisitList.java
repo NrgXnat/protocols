@@ -49,7 +49,7 @@ public class ProjSubVisitList extends SecureResource {
 
         String pID = (String) request.getAttributes().get("PROJECT_ID");
         if(pID != null){
-            proj = XnatProjectdata.getProjectByIDorAlias(pID, user, false);
+            proj = XnatProjectdata.getProjectByIDorAlias(pID, getUser(), false);
         }
 
         if (proj == null) {
@@ -60,9 +60,9 @@ public class ProjSubVisitList extends SecureResource {
 
         String subID = (String) request.getAttributes().get("SUBJECT_ID");
         if(subID!=null){
-            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(proj.getId(), subID, user, false);
+            subject = XnatSubjectdata.GetSubjectByProjectIdentifier(proj.getId(), subID, getUser(), false);
             if(subject==null){
-                subject = XnatSubjectdata.getXnatSubjectdatasById(subID, user, false);
+                subject = XnatSubjectdata.getXnatSubjectdatasById(subID, getUser(), false);
                 if (subject != null && (proj != null && !subject.hasProject(proj.getId()))) {
                     subject = null;
                 }
@@ -87,7 +87,7 @@ public class ProjSubVisitList extends SecureResource {
 
         try {
             SubjectVisitInfo subjectVisitInfo = null;
-            subjectVisitInfo = new SubjectVisitInfo(subject, proj.getId(), user);
+            subjectVisitInfo = new SubjectVisitInfo(subject, proj.getId(), getUser());
 
             if (this.isQueryVariableTrue("initial")) {
                 List<String> initialVisits = new ArrayList<String>();
@@ -111,7 +111,7 @@ public class ProjSubVisitList extends SecureResource {
                 return new StringRepresentation(response, MediaType.APPLICATION_JSON);
             }
             else if (this.getQueryVariable("sessionID") != null) {
-                XnatExperimentdata session = XnatExperimentdata.getXnatExperimentdatasById(this.getQueryVariable("sessionID"), user, false);
+                XnatExperimentdata session = XnatExperimentdata.getXnatExperimentdatasById(this.getQueryVariable("sessionID"), getUser(), false);
                 if (session != null) {
                     String type = session.getXSIType();
                     String subtype = this.getQueryVariable("subtype");

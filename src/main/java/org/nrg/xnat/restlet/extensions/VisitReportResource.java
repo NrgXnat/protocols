@@ -11,6 +11,7 @@ package org.nrg.xnat.restlet.extensions;/*
  */
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +83,11 @@ public class VisitReportResource extends AbstractProtocolResource {
     public Representation represent(Variant variant) throws ResourceException {
         String response = "{}";
         if (projectId != null) { // get visit information on a specific project
-            XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, user, false); // just checking to see if user has project access
+            XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectId, getUser(), false); // just checking to see if user has project access
             if (project == null) {
                 return new StringRepresentation("{\"error\":\"The project ID "+projectId+" does not exist or you do not have access to it.\"}", MediaType.APPLICATION_JSON);
             }
-            Protocol protocol = getProjectProtocolService().getProtocolForProject(projectId, user);
+            Protocol protocol = getProjectProtocolService().getProtocolForProject(projectId, getUser());
             if (protocol == null) {
                 return new StringRepresentation("{\"error\":\"No protocol is associated with project ID: "+projectId+"\"}", MediaType.APPLICATION_JSON);
             }
@@ -100,7 +100,7 @@ public class VisitReportResource extends AbstractProtocolResource {
                 }
             } else {
                 try {
-                    HashMap vr = getVisitReport(project, protocol);
+                    final Map<String, VisitReportInfo> vr = getVisitReport(project, protocol);
                     response = mapper.writeValueAsString(vr);
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
@@ -111,9 +111,9 @@ public class VisitReportResource extends AbstractProtocolResource {
         return sr;
     }
 
-    public static HashMap <String, VisitReportInfo> getVisitReport(XnatProjectdata project, Protocol protocol) {
+    public static Map <String, VisitReportInfo> getVisitReport(XnatProjectdata project, Protocol protocol) {
         List <VisitType> visitTypes = protocol.getVisitTypes();
-        HashMap <String, VisitReportInfo> visitReport = new HashMap();
+        Map <String, VisitReportInfo> visitReport = Maps.newHashMap();
         // create separate buckets for open, closed, upcoming, etc...
         if(visitTypes != null) {
             int i=0;
@@ -165,9 +165,7 @@ public class VisitReportResource extends AbstractProtocolResource {
                                 vri.setStatus((String)row.get("status"));
                                 visitReport.put(vri.getSubjectId(), vri);
                             }
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        } catch (DBPoolException e) {
+                        } catch (SQLException | DBPoolException e) {
                             e.printStackTrace();
                         }
                     }

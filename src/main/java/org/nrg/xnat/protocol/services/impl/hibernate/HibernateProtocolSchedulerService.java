@@ -62,7 +62,7 @@ public class HibernateProtocolSchedulerService implements ProtocolSchedulerServi
         for (Map.Entry<String, Protocol> projectProtocolMap : projectProtocols.entrySet()){
             XnatProjectdata project = XnatProjectdata.getProjectByIDorAlias(projectProtocolMap.getKey(), (XDATUser) user, false);
             Protocol projectProtocol = projectProtocolMap.getValue();
-            HashMap <String, VisitReportInfo> visitReports = VisitReportResource.getVisitReport(project, projectProtocol);
+            final Map <String, VisitReportInfo> visitReports = VisitReportResource.getVisitReport(project, projectProtocol);
             if(projectProtocol.getEmailNotifications().contains("visitApproachingWindow")) {
                 //Only send notification emails if requested
                 for (Map.Entry<String, VisitReportInfo> visitReport : visitReports.entrySet()) {
@@ -115,7 +115,7 @@ public class HibernateProtocolSchedulerService implements ProtocolSchedulerServi
             Protocol projectProtocol = projectProtocolMap.getValue();
             if(projectProtocol.getEmailNotifications().contains("overdueMissedVisit")) {
                 //Only send notification emails if requested
-                HashMap<String, VisitReportInfo> visitReports = VisitReportResource.getVisitReport(project, projectProtocol);
+                final Map<String, VisitReportInfo> visitReports = VisitReportResource.getVisitReport(project, projectProtocol);
                 for (Map.Entry<String, VisitReportInfo> visitReport : visitReports.entrySet()) {
                     VisitReportInfo visitReportInfo = visitReport.getValue();
                     Date nextClosed = visitReportInfo.getNextClosed();
