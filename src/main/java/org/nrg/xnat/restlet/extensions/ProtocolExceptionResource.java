@@ -1,13 +1,13 @@
-package org.nrg.xnat.restlet.extensions;/*
- * org.nrg.xnat.restlet.extensions.ProtocolExceptionResource
+/*
+ * protocols: org.nrg.xnat.restlet.extensions.ProtocolExceptionResource
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 8/27/13 11:51 AM
  */
+
+package org.nrg.xnat.restlet.extensions;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;

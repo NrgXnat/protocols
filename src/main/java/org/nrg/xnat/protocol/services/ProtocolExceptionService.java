@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.services;/*
- * org.nrg.xnat.protocol.services.ProtocolExceptionService
+/*
+ * protocols: org.nrg.xnat.protocol.services.ProtocolExceptionService
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 8/27/13 11:07 AM
  */
+
+package org.nrg.xnat.protocol.services;
 
 import org.nrg.framework.orm.hibernate.BaseHibernateService;
 import org.nrg.xnat.protocol.entities.ProtocolException;

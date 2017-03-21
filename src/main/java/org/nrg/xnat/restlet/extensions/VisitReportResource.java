@@ -1,14 +1,13 @@
-package org.nrg.xnat.restlet.extensions;/*
- * org.nrg.xnat.restlet.extensions.ProtocolResource
+/*
+ * protocols: org.nrg.xnat.restlet.extensions.VisitReportResource
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 8/16/13 11:05 AM
- * Author: Justin Cleveland (clevelandj@mir.wustl.edu)
  */
+
+package org.nrg.xnat.restlet.extensions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Maps;

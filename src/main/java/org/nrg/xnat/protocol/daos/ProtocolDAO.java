@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.daos;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.protocol.daos.ProtocolDAO
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 9/18/13 1:36 PM
  */
+
+package org.nrg.xnat.protocol.daos;
 
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;

@@ -1,13 +1,14 @@
-package org.nrg.xnat.protocol.services;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.protocol.services.ProtocolLineageService
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 3/19/14 1:20 PM
  */
+
+package org.nrg.xnat.protocol.services;
+ 
 
 import org.nrg.framework.orm.hibernate.BaseHibernateService;
 import org.nrg.xnat.protocol.entities.ProtocolLineage;

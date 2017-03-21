@@ -1,13 +1,13 @@
-package org.nrg.xnat.restlet.extensions;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.restlet.extensions.ProjExpSubtype
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 10/2/13 9:27 AM
  */
+
+package org.nrg.xnat.restlet.extensions;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.logging.Log;

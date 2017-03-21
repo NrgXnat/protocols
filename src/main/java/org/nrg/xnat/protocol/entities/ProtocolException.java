@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.entities;/*
- * org.nrg.xnat.protocol.entities.ProtocolException
+/*
+ * protocols: org.nrg.xnat.protocol.entities.ProtocolException
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 8/27/13 10:46 AM
  */
+
+package org.nrg.xnat.protocol.entities;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

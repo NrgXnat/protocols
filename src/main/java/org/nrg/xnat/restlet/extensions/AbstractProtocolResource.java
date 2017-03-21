@@ -1,14 +1,13 @@
-package org.nrg.xnat.restlet.extensions;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.restlet.extensions.AbstractProtocolResource
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 2/12/14 4:10 PM
  */
 
+package org.nrg.xnat.restlet.extensions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.nrg.xdat.XDAT;

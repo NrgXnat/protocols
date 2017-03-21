@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.services.impl.hibernate;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.protocol.services.impl.hibernate.HibernateProtocolLineageService
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 3/19/14 1:21 PM
  */
+
+package org.nrg.xnat.protocol.services.impl.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -1,12 +1,13 @@
-package org.nrg.xnat.protocol.services.impl.hibernate;
-
 /*
+ * protocols: org.nrg.xnat.protocol.services.impl.hibernate.HibernateProtocolSchedulerService
  * XNAT http://www.xnat.org
- * Copyright (c) 2016, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
  */
+
+package org.nrg.xnat.protocol.services.impl.hibernate;
 
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;

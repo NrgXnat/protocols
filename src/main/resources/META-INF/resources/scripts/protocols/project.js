@@ -1,11 +1,10 @@
 /*
+ * protocols: src/main/resources/META-INF/resources/scripts/protocols/project.js
  * XNAT http://www.xnat.org
- * Copyright (c) 2016, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Author: Justin Cleveland <clevelandj@wustl.edu> (jcleve01)
  */
 
 var projectProtocolController = angular.module('projectProtocol', ['ngResource', 'ui.bootstrap', 'protocol.services', 'protocol.directives'])

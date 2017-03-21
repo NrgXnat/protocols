@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.daos;/*
- * org.nrg.xnat.protocol.daos.ExceptionDAO
+/*
+ * protocols: org.nrg.xnat.protocol.daos.ProtocolExceptionDAO
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 8/27/13 11:00 AM
  */
+
+package org.nrg.xnat.protocol.daos;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;

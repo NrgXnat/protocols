@@ -1,6 +1,17 @@
-def pluginVersion = '1.0.0-SNAPSHOT'
+/*
+ * protocols: build.gradle
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2017, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ */
+
+import org.gradle.internal.jvm.Jvm
+
 group 'org.nrg.xnat.protocol'
-version pluginVersion
+version '1.0.0-SNAPSHOT'
+
 def vXnatDev = '1.7.3-SNAPSHOT'
 def vXnat = '1.7.2'
 def vSpring = '4.2.9.RELEASE'
@@ -101,21 +112,33 @@ repositories {
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-if (hasProperty("rt.17.jar")) {
-    // Solution for bootstrap classpath warning and possible issues with compatibility with 1.7 libraries
-    // was taken from this post on discuss.gradle.org: http://bit.ly/24xD9j0
-    def rt17jar = getProperty("rt.17.jar")
-    logger.info "Using ${rt17jar} as the bootstrap class path jar."
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.fork = true
-            options.compilerArgs << "-XDignore.symbol.file"
-            options.bootClasspath = rt17jar
+def javaVersion = Jvm.current().javaVersion
+if (javaVersion.java8Compatible || javaVersion.java9Compatible) {
+    if (hasProperty("rt.17.jar")) {
+        // Solution for bootstrap classpath warning and possible issues with compatibility with 1.7 libraries
+        // was taken from this post on discuss.gradle.org: http://bit.ly/24xD9j0
+        def rt17jar = getProperty("rt.17.jar")
+        logger.info "Using ${rt17jar} as the bootstrap class path jar."
+        gradle.projectsEvaluated {
+            tasks.withType(JavaCompile) {
+                options.fork = true
+                options.compilerArgs << "-XDignore.symbol.file"
+                options.bootClasspath = rt17jar
+            }
         }
+    } else {
+        logger.warn "No value was set for the rt.17.jar build property, but you are using a Java 8- or 9-compatible JDK. You should consider setting rt.17.jar to indicate a jar file containing the Java 1.7 run-time library:\n"
+        logger.warn "\n"
+        logger.warn "  ./gradlew -Prt.17.jar=rt-1.7.0_45.jar war\n"
+        logger.warn "\n"
+        logger.warn "You can also set this property in a gradle.properties file, either in the top level of your build folder or in the folder ~/.gradle/:\n"
+        logger.warn "\n"
+        logger.warn "  rt.17.jar=/home/developer/.gradle/rt.17.jar\n"
+        logger.warn "\n"
+        logger.warn "In some isolated instances, using a bootstrap library from a JDK version later than 1.7 can result in run-time errors.\n"
     }
-} else {
-    logger.warn "No value was set for the rt.17.jar build property, using the default bootstrap class path. You should consider setting rt.17.jar to indicate a jar file containing the Java 1.7 run-time library:\n"
-    logger.warn "  ./gradlew -Prt.17.jar=rt-1.7.0_45.jar clean test\n"
+} else if (!javaVersion.java7Compatible) {
+    throw new BuildCancelledException("You are using a JDK version (${javaVersion}) that is not compatible with Java 7. The XNAT build will fail. Please install a JDK version of Java 7 or later.")
 }
 
 configurations {
@@ -197,13 +220,13 @@ publishing {
                 def root = asNode()
                 root.appendNode('name', 'XNAT Visits And Protocols Plugin')
                 root.appendNode('description', '')
-                root.appendNode('url', 'https://bitbucket.org/jcleve01/protocols-plugin')
+                root.appendNode('url', 'https://github.com/nrgxnat/protocols-plugin')
                 root.appendNode('inceptionYear', '2016')
 
                 def scm = root.appendNode('scm')
-                scm.appendNode('url', 'https://bitbucket.org/jcleve01/protocols-plugin')
-                scm.appendNode('connection', 'scm:https://jcleve01@bitbucket.org/jcleve01/protocols-plugin.git')
-                scm.appendNode('developerConnection', 'scm:https://jcleve01@bitbucket.org/jcleve01/protocols-plugin.git')
+                scm.appendNode('url', 'https://github.com/nrgxnat/protocols-plugin')
+                scm.appendNode('connection', 'scm:https://jcleve01@github.com/nrgxnat/protocols-plugin.git')
+                scm.appendNode('developerConnection', 'scm:https://jcleve01@github.com/nrgxnat/protocols-plugin.git')
 
                 def license = root.appendNode('licenses').appendNode('license')
                 license.appendNode('name', 'Simplified BSD 2-Clause License')
@@ -215,6 +238,10 @@ publishing {
                 clevelandj.appendNode('id', 'clevelandj')
                 clevelandj.appendNode('name', 'Justin Cleveland')
                 clevelandj.appendNode('email', 'clevelandj@wustl.edu')
+                def rherrick = developers.appendNode('developer')
+                rherrick.appendNode('id', 'rherrick')
+                rherrick.appendNode('name', 'Rick Herrick')
+                rherrick.appendNode('email', 'jrherrick@wustl.edu')
             }
         }
     }

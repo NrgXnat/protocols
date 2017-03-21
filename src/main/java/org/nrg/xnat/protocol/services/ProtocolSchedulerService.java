@@ -1,12 +1,13 @@
-package org.nrg.xnat.protocol.services;
-
 /*
+ * protocols: org.nrg.xnat.protocol.services.ProtocolSchedulerService
  * XNAT http://www.xnat.org
- * Copyright (c) 2016, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
  */
+
+package org.nrg.xnat.protocol.services;
 
 import org.nrg.xdat.om.XnatPvisitdata;
 import org.nrg.xft.security.UserI;
@@ -25,17 +26,24 @@ public interface ProtocolSchedulerService {
      * This method finds any visits for the specified projects that are within the window specified by the {@link
      * ProjectProtocol project protocol} and have not yet been scheduled. If no project IDs are specified, then all
      * projects with associated protocols are searched.
-     * @param projectIds    Zero or more project IDs for the projects to be searched for visits nearing the scheduling
-     *                      window.
+     *
+     * @param user       The user requesting the visits.
+     * @param projectIds Zero or more project IDs for the projects to be searched for visits nearing the scheduling
+     *                   window.
+     *
      * @return A list of all visits nearing the scheduling window.
      */
     List<XnatPvisitdata> findVisitsNearScheduling(final UserI user, final String... projectIds);
+
     /**
      * This method finds any visits for the specified projects that are nearing the allowable delta drift specified by
      * the {@link ProjectProtocol project protocol} and have not yet been complete. If no project IDs are specified,
      * then all projects with associated protocols are searched.
-     * @param projectIds    Zero or more project IDs for the projects to be searched for visits nearing the exception
-     *                      window.
+     *
+     * @param user       The user requesting the visits.
+     * @param projectIds Zero or more project IDs for the projects to be searched for visits nearing the exception
+     *                   window.
+     *
      * @return A list of all visits nearing the exception window.
      */
     List<XnatPvisitdata> findVisitsNearException(final UserI user, final String... projectIds);

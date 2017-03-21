@@ -1,13 +1,13 @@
-package org.nrg.xnat.screens.uploadApplet.context;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.screens.uploadApplet.context.VisitContextAction
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 4/8/14 2:38 PM
  */
+
+package org.nrg.xnat.screens.uploadApplet.context;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.turbine.util.RunData;

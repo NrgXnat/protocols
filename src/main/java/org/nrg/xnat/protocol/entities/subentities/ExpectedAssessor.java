@@ -1,13 +1,14 @@
-package org.nrg.xnat.protocol.entities.subentities;/*
- * org.nrg.xnat.protocol.entities.subentities.ExpectedAssessor
+/*
+ * protocols: org.nrg.xnat.protocol.entities.subentities.ExpectedAssessor
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 9/10/13 1:41 PM
  */
+
+package org.nrg.xnat.protocol.entities.subentities;
+ 
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;

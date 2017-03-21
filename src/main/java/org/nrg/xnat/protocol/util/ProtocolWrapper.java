@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.util;/*
- * org.nrg.xnat.helpers.prearchive.PrearcDatabase
+/*
+ * protocols: org.nrg.xnat.protocol.util.ProtocolWrapper
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 2/12/14 3:20 PM
  */
+
+package org.nrg.xnat.protocol.util;
 
 import org.nrg.xnat.protocol.entities.Protocol;
 

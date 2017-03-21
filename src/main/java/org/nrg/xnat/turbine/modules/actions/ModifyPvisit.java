@@ -1,3 +1,12 @@
+/*
+ * protocols: org.nrg.xnat.turbine.modules.actions.ModifyPvisit
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2017, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ */
+
 package org.nrg.xnat.turbine.modules.actions;
 
 import org.apache.log4j.Logger;

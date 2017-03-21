@@ -1,13 +1,13 @@
-package org.nrg.xnat.protocol.util;/*
- * org.nrg.xnat.protocol.util.SubjectVisitInfo
+/*
+ * protocols: org.nrg.xnat.protocol.util.VisitReportInfo
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Created 9/12/13 1:27 PM
  */
+
+package org.nrg.xnat.protocol.util;
 
 import java.sql.Date;
 

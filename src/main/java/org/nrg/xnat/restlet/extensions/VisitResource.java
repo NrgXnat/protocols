@@ -1,13 +1,12 @@
 /*
- * org.nrg.xnat.restlet.extensions.VisitResource
+ * protocols: org.nrg.xnat.restlet.extensions.VisitResource 
  * XNAT http://www.xnat.org
- * Copyright (c) 2013, Washington University School of Medicine
+ * Copyright (c) 2017, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
- *
- * Last modified 7/10/13 8:47 PM
  */
+
 package org.nrg.xnat.restlet.extensions;
 
 import org.apache.commons.logging.Log;
