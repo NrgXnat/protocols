@@ -9,28 +9,11 @@
 
 import org.gradle.internal.jvm.Jvm
 
-group 'org.nrg.xnat.protocol'
-version '1.0.0-SNAPSHOT'
-
-def vXnatDev = '1.7.3-SNAPSHOT'
-def vXnat = '1.7.2'
-def vSpring = '4.2.9.RELEASE'
-def vSpringSecurity = '4.0.4.RELEASE'
-def vSwagger = '2.4.0'
-def vJunit = '4.12'
-def vServletApi = '3.1.0'
-def vH2 = '1.4.191'
-def vGroovy = '2.4.7'
-def vLog4j = '1.2.17'
-
-apply plugin: 'groovy'
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-
 buildscript {
+    ext {
+        vXnatDev = '1.7.3-SNAPSHOT'
+        vXnat = '1.7.2'
+    }
     repositories {
         mavenLocal()
         mavenCentral()
@@ -45,7 +28,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.nrg.xnat.build:xnat-data-builder:1.7.3-SNAPSHOT"
+        classpath "org.nrg.xnat.build:xnat-data-builder:${vXnatDev}"
     }
     configurations {
         all*.exclude group: 'avalon-framework'
@@ -86,6 +69,25 @@ buildscript {
         all*.exclude module: 'slf4j-simple'
     }
 }
+
+group 'org.nrg.xnat.protocol'
+version '1.0.0-SNAPSHOT'
+
+def vSpring = '4.2.9.RELEASE'
+def vSpringSecurity = '4.0.4.RELEASE'
+def vSwagger = '2.4.0'
+def vJunit = '4.12'
+def vServletApi = '3.1.0'
+def vH2 = '1.4.191'
+def vGroovy = '2.4.7'
+def vLog4j = '1.2.17'
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
 
 repositories {
     mavenLocal()
@@ -276,8 +278,9 @@ dependencies {
     compile("org.nrg.xdat:core:${vXnatDev}") {
         transitive = false
     }
-    compile "org.nrg:notify:${vXnat}"
+    compile "org.nrg:notify:${vXnatDev}"
     compile "org.nrg:prefs:${vXnatDev}"
+    compile "org.nrg:config:${vXnat}"
     compile "org.nrg:framework:${vXnatDev}"
     
     compile "org.reflections:reflections:0.9.10"
@@ -299,8 +302,6 @@ dependencies {
     compile "commons-fileupload:commons-fileupload:1.3.2"
     compile "org.restlet:org.restlet:1.1.10"
     compile "org.quartz-scheduler:quartz:2.2.2"
-    compile "org.nrg:config:${vXnat}"
-    compile "javax.mail:javax.mail-api:1.5.5"
     compile "org.springframework:spring-webmvc:${vSpring}"
     compile "org.springframework:spring-context-support:${vSpring}"
     compile "org.springframework:spring-context:${vSpring}"
